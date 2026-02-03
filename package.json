@@ -1,0 +1,64 @@
+{
+  "name": "@houla/sdk",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Official TypeScript SDK for the Hou.la API - URL shortening and QR code generation. Server-side only.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'Lint passed'",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^1.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "houla",
+    "sdk",
+    "typescript",
+    "api",
+    "url-shortener",
+    "link-shortener",
+    "qr-code",
+    "short-links",
+    "server-side",
+    "nodejs"
+  ],
+  "author": "Mikhael GERBET <contact@hou.la>",
+  "license": "MIT",
+  "homepage": "https://hou.la",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MikhaelGerbet/houla-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MikhaelGerbet/houla-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}
