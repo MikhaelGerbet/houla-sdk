@@ -2,7 +2,7 @@
   "name": "@houla/sdk",
   "version": "1.0.0",
   "type": "module",
-  "description": "Official TypeScript SDK for the Hou.la API - URL shortening and QR code generation. Server-side only.",
+  "description": "Official TypeScript SDK for Hou.la - Free URL shortener, link shortener & QR code generator. Zero dependencies, lightweight, server-side only.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -13,9 +13,7 @@
       "require": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -23,7 +21,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'Lint passed'",
+    "lint": "echo Lint passed",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
@@ -39,10 +37,53 @@
     "api",
     "url-shortener",
     "link-shortener",
+    "short-url",
+    "short-link",
+    "shorten-url",
+    "shorten-link",
     "qr-code",
+    "qrcode",
+    "qr-generator",
+    "qr-code-generator",
     "short-links",
     "server-side",
-    "nodejs"
+    "nodejs",
+    "free",
+    "free-url-shortener",
+    "free-link-shortener",
+    "free-qr-code",
+    "bitly",
+    "bitly-alternative",
+    "tinyurl",
+    "tinyurl-alternative",
+    "rebrandly",
+    "rebrandly-alternative",
+    "shortio",
+    "short-io-alternative",
+    "zero-dependencies",
+    "lightweight",
+    "utm",
+    "utm-tracking",
+    "utm-parameters",
+    "analytics",
+    "link-analytics",
+    "click-tracking",
+    "ephemeral-links",
+    "temporary-links",
+    "expiring-links",
+    "self-destructing-links",
+    "custom-short-url",
+    "custom-short-link",
+    "branded-links",
+    "link-management",
+    "url-management",
+    "nextjs",
+    "express",
+    "nestjs",
+    "fastify",
+    "edge-functions",
+    "vercel",
+    "cloudflare-workers"
   ],
   "author": "Mikhael GERBET <contact@hou.la>",
   "license": "MIT",
@@ -53,6 +94,10 @@
   },
   "bugs": {
     "url": "https://github.com/MikhaelGerbet/houla-sdk/issues"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://hou.la"
   },
   "publishConfig": {
     "access": "public"
