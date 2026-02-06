@@ -48,11 +48,11 @@ const houla = new HoulaClient({
 });
 
 // Create a short link
-const result = await houla.createLink({
+const link = await houla.createLink({
   url: "https://example.com/very-long-url",
 });
 
-console.log(result.shortUrl); // https://hou.la/abc123
+console.log(`https://hou.la/${link.key}`); // https://hou.la/abc123
 ```
 
 ## Create Link - All Options
@@ -71,10 +71,8 @@ console.log(result.shortUrl); // https://hou.la/abc123
 | `utm_content` | `string` | No | UTM content (for A/B testing) |
 | `isEphemeral` | `boolean` | No | Create a self-destructing link |
 | `ephemeralDuration` | `EphemeralDuration` | No | Duration: `"1h"`, `"6h"`, `"12h"`, `"24h"`, `"48h"` |
-| `includeQrCode` | `boolean` | No | Include QR code in response |
-| `qrCodeOptions` | `QRCodeOptions` | No | QR code customization |
 
-### QR Code Options
+### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -89,12 +87,13 @@ console.log(result.shortUrl); // https://hou.la/abc123
 
 ```typescript
 // Basic link
-const result = await houla.createLink({
+const link = await houla.createLink({
   url: "https://example.com",
 });
+console.log(`https://hou.la/${link.key}`); // https://hou.la/abc123
 
 // With custom key
-const result = await houla.createLink({
+const link = await houla.createLink({
   url: "https://example.com",
   key: "my-promo", // https://hou.la/my-promo
   title: "Summer Sale 2026",
@@ -103,14 +102,15 @@ const result = await houla.createLink({
 // Ephemeral link (self-destructing)
 import { EphemeralDuration } from "@houla/sdk";
 
-const result = await houla.createLink({
+const link = await houla.createLink({
   url: "https://example.com/secret",
   isEphemeral: true,
   ephemeralDuration: EphemeralDuration.HOURS_24,
 });
+// link.expiresAt contains the expiration date
 
 // With UTM parameters for marketing
-const result = await houla.createLink({
+const link = await houla.createLink({
   url: "https://example.com/landing",
   utm: true,
   utm_source: "newsletter",
@@ -118,16 +118,9 @@ const result = await houla.createLink({
   utm_campaign: "january_2026",
 });
 
-// With QR Code
-const result = await houla.createLink({
-  url: "https://example.com",
-  includeQrCode: true,
-  qrCodeOptions: {
-    width: 300,
-    darkColor: "#1a1a1a",
-  },
-});
-console.log(result.qrCode?.dataUrl); // data:image/png;base64,...
+// Generate QR Code separately
+const qr = await houla.getQRCodePng(link.key, { width: 300 });
+console.log(qr.dataUrl); // data:image/png;base64,...
 ```
 
 ## Other Methods
@@ -167,8 +160,9 @@ const houla = new HoulaClient({ apiKey: process.env.HOULA_API_KEY! });
 
 export async function POST(request: Request) {
   const { url } = await request.json();
-  const result = await houla.createLink({ url, includeQrCode: true });
-  return NextResponse.json({ shortUrl: result.shortUrl, qr: result.qrCode?.dataUrl });
+  const link = await houla.createLink({ url });
+  const qr = await houla.getQRCodePng(link.key);
+  return NextResponse.json({ shortUrl: `https://hou.la/${link.key}`, qr: qr.dataUrl });
 }
 ```
 
@@ -181,8 +175,8 @@ import { HoulaClient } from "@houla/sdk";
 const houla = new HoulaClient({ apiKey: process.env.HOULA_API_KEY! });
 
 app.post("/api/shorten", async (req, res) => {
-  const result = await houla.createLink({ url: req.body.url });
-  res.json({ shortUrl: result.shortUrl });
+  const link = await houla.createLink({ url: req.body.url });
+  res.json({ shortUrl: `https://hou.la/${link.key}` });
 });
 ```
 

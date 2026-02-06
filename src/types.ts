@@ -106,8 +106,6 @@ export interface CreateLinkDto {
   utm_content?: string;
   isEphemeral?: boolean;
   ephemeralDuration?: EphemeralDuration;
-  includeQrCode?: boolean;
-  qrCodeOptions?: QRCodeOptions;
   createdByType?: LinkCreatedType;
 }
 
@@ -141,12 +139,6 @@ export interface QRCodePngResponse {
 
 export interface QRCodeSvgResponse {
   svg: string;
-}
-
-export interface LinkWithQRCodeResponse {
-  link: Link;
-  shortUrl: string;
-  qrCode?: QRCodePngResponse;
 }
 
 export interface CheckAvailabilityResponse {

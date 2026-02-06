@@ -95,14 +95,11 @@ describe("HoulaClient", () => {
 
   describe("createLink", () => {
     it("should create link", async () => {
-      const mockResponse = {
-        link: { id: "1", key: "abc123", url: "https://example.com" },
-        shortUrl: "https://hou.la/abc123",
-      };
+      const mockLink = { id: "1", key: "abc123", url: "https://example.com" };
 
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        json: () => Promise.resolve(mockLink),
       });
 
       const result = await client.createLink({ url: "https://example.com" });
@@ -111,7 +108,7 @@ describe("HoulaClient", () => {
         expect.stringContaining("/api/link"),
         expect.objectContaining({ method: "POST" })
       );
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(mockLink);
     });
   });
 

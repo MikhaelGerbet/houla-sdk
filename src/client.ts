@@ -4,7 +4,6 @@ import {
   CreateLinkDto,
   UpdateLinkDto,
   PaginatedResponse,
-  LinkWithQRCodeResponse,
   CheckAvailabilityResponse,
   DeleteLinkResponse,
   QRCodeOptions,
@@ -74,8 +73,8 @@ export class HoulaClient {
     return response.json();
   }
 
-  async createLink(data: CreateLinkDto, source: LinkCreatedType = LinkCreatedType.API): Promise<LinkWithQRCodeResponse> {
-    return this.request<LinkWithQRCodeResponse>("/api/link", {
+  async createLink(data: CreateLinkDto, source: LinkCreatedType = LinkCreatedType.API): Promise<Link> {
+    return this.request<Link>("/api/link", {
       method: "POST",
       body: JSON.stringify(data),
       headers: { "X-Source": source },

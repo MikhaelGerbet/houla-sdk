@@ -26,7 +26,6 @@ export type {
   PaginatedResponse,
   QRCodePngResponse,
   QRCodeSvgResponse,
-  LinkWithQRCodeResponse,
   CheckAvailabilityResponse,
   DeleteLinkResponse,
 } from "./types";
