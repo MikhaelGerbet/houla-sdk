@@ -27,6 +27,8 @@ describe("HoulaClient", () => {
     id: "test-uuid-123",
     key: "abc123",
     url: "https://example.com",
+    shortUrl: "https://hou.la/abc123",
+    flashUrl: "https://hou.la/abc123/f",
     title: "Test Link",
     createdAt: new Date().toISOString(),
     hitsCount: 0,
@@ -300,6 +302,24 @@ describe("HoulaClient", () => {
         })
       );
       expect(result).toEqual(mockLink);
+    });
+
+    it("should return shortUrl and flashUrl in response", async () => {
+      const mockLink = createMockLink({
+        key: "test-key",
+        shortUrl: "https://hou.la/test-key",
+        flashUrl: "https://hou.la/test-key/f",
+      });
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      const result = await client.createLink({ url: "https://example.com" });
+
+      expect(result.shortUrl).toBe("https://hou.la/test-key");
+      expect(result.flashUrl).toBe("https://hou.la/test-key/f");
     });
 
     it("should create link with custom key", async () => {

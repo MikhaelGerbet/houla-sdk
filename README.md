@@ -52,8 +52,37 @@ const link = await houla.createLink({
   url: "https://example.com/very-long-url",
 });
 
-console.log(`https://hou.la/${link.key}`); // https://hou.la/abc123
+console.log(link.shortUrl);  // https://hou.la/abc4
+console.log(link.flashUrl);  // https://hou.la/abc4/f (for QR code tracking)
 ```
+
+## API Response
+
+When creating a link, the API returns:
+
+```typescript
+{
+  id: string;
+  key: string;           // The short key (e.g., "abc4")
+  url: string;           // The destination URL
+  shortUrl: string;      // Full short URL (e.g., "https://hou.la/abc4")
+  flashUrl: string;      // URL for QR codes (e.g., "https://hou.la/abc4/f")
+  isEphemeral?: boolean;
+  expiresAt?: Date;
+  // ...other properties
+}
+```
+
+> **Note:** Use `flashUrl` for QR codes to track scans separately from direct link clicks.
+
+### Key Length Generation
+
+When no custom key is provided, the API auto-generates one:
+
+| Link Type | Minimum Length |
+|-----------|----------------|
+| Ephemeral (temporary) | 3 characters |
+| Classic (permanent) | 4 characters |
 
 ## Create Link - All Options
 
@@ -90,14 +119,15 @@ console.log(`https://hou.la/${link.key}`); // https://hou.la/abc123
 const link = await houla.createLink({
   url: "https://example.com",
 });
-console.log(`https://hou.la/${link.key}`); // https://hou.la/abc123
+console.log(link.shortUrl); // https://hou.la/abc4
 
 // With custom key
 const link = await houla.createLink({
   url: "https://example.com",
-  key: "my-promo", // https://hou.la/my-promo
+  key: "my-promo",      // custom key
   title: "Summer Sale 2026",
 });
+console.log(link.shortUrl); // https://hou.la/my-promo
 
 // Ephemeral link (self-destructing)
 import { EphemeralDuration } from "@houla/sdk";

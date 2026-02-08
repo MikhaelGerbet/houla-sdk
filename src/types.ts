@@ -56,6 +56,8 @@ export interface Link {
   id: string;
   key: string;
   url: string;
+  shortUrl?: string;
+  flashUrl?: string;
   title?: string;
   createdAt: string;
   updatedAt?: string;
