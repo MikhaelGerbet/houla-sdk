@@ -1,6 +1,6 @@
 {
   "name": "@houla/sdk",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "Official TypeScript SDK for Hou.la - Free URL shortener, link shortener, QR code generator. Zero dependencies, lightweight, server-side only and link in bio.",
   "main": "dist/index.js",
