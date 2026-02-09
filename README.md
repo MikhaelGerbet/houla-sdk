@@ -102,7 +102,7 @@ When no custom key is provided, the API auto-generates one:
 | `utm_content` | `string` | No | UTM content (for A/B testing) |
 | `isEphemeral` | `boolean` | No | Create a self-destructing link |
 | `ephemeralDuration` | `EphemeralDuration` | No | Duration: `"1h"`, `"6h"`, `"12h"`, `"24h"`, `"48h"` |
-| `password` | `string` | No | Password to protect the link (1-100 chars). Hashed with bcrypt. Anti brute force: 5 attempts / 15 min lockout. |
+| `password` | `string` | No | Password to protect the link (1-100 chars). Hashed with bcrypt. Anti brute force protection included. |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
@@ -158,7 +158,7 @@ const protectedLink = await houla.createLink({
 });
 console.log(protectedLink.hasPassword); // true
 // Visitors must enter the password before being redirected
-// Anti brute force: 5 attempts max per IP+link, 15 min lockout
+// Anti brute force protection included
 
 // Generate QR Code separately
 const qr = await houla.getQRCodePng(link.key, { width: 300 });
