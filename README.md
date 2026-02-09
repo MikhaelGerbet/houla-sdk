@@ -68,6 +68,7 @@ When creating a link, the API returns:
   url: string;           // The destination URL
   shortUrl: string;      // Full short URL (e.g., "https://hou.la/abc4")
   flashUrl: string;      // URL for QR codes (e.g., "https://hou.la/abc4/f")
+  hasPassword: boolean;  // Whether the link is password-protected
   isEphemeral?: boolean;
   expiresAt?: Date;
   // ...other properties
@@ -101,6 +102,7 @@ When no custom key is provided, the API auto-generates one:
 | `utm_content` | `string` | No | UTM content (for A/B testing) |
 | `isEphemeral` | `boolean` | No | Create a self-destructing link |
 | `ephemeralDuration` | `EphemeralDuration` | No | Duration: `"1h"`, `"6h"`, `"12h"`, `"24h"`, `"48h"` |
+| `password` | `string` | No | Password to protect the link (1-100 chars). Hashed with bcrypt. Anti brute force: 5 attempts / 15 min lockout. |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
@@ -148,6 +150,15 @@ const link = await houla.createLink({
   utm_medium: "email",
   utm_campaign: "january_2026",
 });
+
+// Password-protected link
+const protectedLink = await houla.createLink({
+  url: "https://example.com/private-doc",
+  password: "secret123",
+});
+console.log(protectedLink.hasPassword); // true
+// Visitors must enter the password before being redirected
+// Anti brute force: 5 attempts max per IP+link, 15 min lockout
 
 // Generate QR Code separately
 const qr = await houla.getQRCodePng(link.key, { width: 300 });
@@ -317,6 +328,7 @@ export class LinkService {
 | **Smart Routing** | FREE | Enterprise only | No | Paid |
 | **A/B Testing** | FREE | Enterprise only | No | Paid |
 | **Password links** | FREE | Paid | No | Paid |
+| **Anti brute force** | FREE | No | No | No |
 
 ## Get Your FREE API Key
 
