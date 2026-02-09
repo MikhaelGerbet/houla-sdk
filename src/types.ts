@@ -109,6 +109,10 @@ export interface CreateLinkDto {
   isEphemeral?: boolean;
   ephemeralDuration?: EphemeralDuration;
   createdByType?: LinkCreatedType;
+  /** Protect link with a password */
+  isPasswordProtected?: boolean;
+  /** Password for protected link */
+  password?: string;
 }
 
 export interface UpdateLinkDto {
@@ -160,11 +164,11 @@ export interface DeleteLinkResponse {
 export type RuleMatchType = "all" | "any";
 
 export type RuleConditionField =
-  | "country" | "continent" | "region" | "city"
+  | "country" | "continent"
   | "device" | "os" | "browser" | "language"
   | "referrer" | "social_media"
   | "day_of_week" | "hour" | "date_range"
-  | "is_bot" | "is_first_visit" | "visit_count";
+  | "is_bot" | "is_first_visit";
 
 export type RuleConditionOperator =
   | "equals" | "not_equals"
@@ -189,6 +193,8 @@ export interface LinkRule {
   destinationUrl: string;
   matchType: RuleMatchType;
   isActive: boolean;
+  /** Weight for A/B testing (0-100). Rules with weight > 0 and no conditions are A/B variants */
+  weight: number;
   conditions: LinkRuleCondition[];
   createdAt: string;
   updatedAt: string;
@@ -199,6 +205,8 @@ export interface CreateLinkRuleDto {
   destinationUrl: string;
   matchType?: RuleMatchType;
   isActive?: boolean;
+  /** Weight for A/B testing (0-100) */
+  weight?: number;
   conditions: Omit<LinkRuleCondition, "id">[];
 }
 
@@ -207,5 +215,7 @@ export interface UpdateLinkRuleDto {
   destinationUrl?: string;
   matchType?: RuleMatchType;
   isActive?: boolean;
+  /** Weight for A/B testing (0-100) */
+  weight?: number;
   conditions?: Omit<LinkRuleCondition, "id">[];
 }

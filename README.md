@@ -219,20 +219,39 @@ await houla.deleteLinkRule("link-uuid", rule.id);
 |-------|-------------|
 | `country` | ISO country code (FR, US, DE...) |
 | `continent` | EU, NA, SA, AS, AF, OC, AN |
-| `region` | Region/State name |
-| `city` | City name |
 | `device` | mobile, tablet, desktop |
 | `os` | Windows, macOS, iOS, Android, Linux |
 | `browser` | Chrome, Firefox, Safari, Edge... |
 | `language` | ISO 639-1 code (fr, en, es...) |
-| `referrer` | Referrer hostname |
+| `referrer` | Referrer hostname (domain only) |
 | `social_media` | TikTok, Instagram, Facebook, Twitter/X... |
 | `day_of_week` | monday through sunday |
 | `hour` | 0–23 (UTC) |
 | `date_range` | Date range (ISO format) |
 | `is_bot` | true/false |
-| `is_first_visit` | true/false (cookie-based) |
-| `visit_count` | Number of visits |
+| `is_first_visit` | true/false (cookie-based, "premier click") |
+
+### A/B Testing
+
+Create A/B test variants using the `weight` field. Rules with weights and no conditions are automatically treated as A/B test variants.
+
+```typescript
+// Create A/B test variants
+await houla.createLinkRule("link-uuid", {
+  label: "Variant A",
+  destinationUrl: "https://example.com/page-a",
+  weight: 60, // 60% of traffic
+  conditions: [],
+});
+await houla.createLinkRule("link-uuid", {
+  label: "Variant B",
+  destinationUrl: "https://example.com/page-b",
+  weight: 40, // 40% of traffic
+  conditions: [],
+});
+```
+
+> **Note:** The total weights should equal 100% for predictable distribution. Weights exceeding 100% are refused by the UI.
 
 ## Framework Examples
 
@@ -296,6 +315,8 @@ export class LinkService {
 | **API access** | FREE | Paid | Paid | Paid |
 | **Ephemeral links** | FREE | No | No | No |
 | **Smart Routing** | FREE | Enterprise only | No | Paid |
+| **A/B Testing** | FREE | Enterprise only | No | Paid |
+| **Password links** | FREE | Paid | No | Paid |
 
 ## Get Your FREE API Key
 

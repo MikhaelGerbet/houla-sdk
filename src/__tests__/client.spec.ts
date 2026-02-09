@@ -946,4 +946,215 @@ describe("HoulaClient", () => {
       );
     });
   });
+
+  // ==================== Password-Protected Links ====================
+  describe("password-protected links", () => {
+    it("should create a password-protected link", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({
+        url: "https://example.com",
+        isPasswordProtected: true,
+        password: "my-secret-pass",
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining('"isPasswordProtected":true'),
+        })
+      );
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.isPasswordProtected).toBe(true);
+      expect(body.password).toBe("my-secret-pass");
+    });
+
+    it("should create a link without password when not specified", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({ url: "https://example.com" });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.isPasswordProtected).toBeUndefined();
+      expect(body.password).toBeUndefined();
+    });
+  });
+
+  // ==================== Smart Routing (Link Rules) ====================
+  describe("smart routing rules", () => {
+    const linkId = "test-link-uuid-123";
+
+    it("should get link rules", async () => {
+      const mockRules = [
+        {
+          id: "rule-1", linkId, priority: 1, label: "Rule 1",
+          destinationUrl: "https://example.com/a", matchType: "all",
+          isActive: true, weight: 0, conditions: [],
+          createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+        },
+      ];
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRules),
+      });
+
+      const rules = await client.getLinkRules(linkId);
+      expect(rules).toHaveLength(1);
+      expect(rules[0].id).toBe("rule-1");
+    });
+
+    it("should create a conditional rule", async () => {
+      const mockRule = {
+        id: "rule-new", linkId, priority: 1, label: "FR rule",
+        destinationUrl: "https://example.com/fr", matchType: "all",
+        isActive: true, weight: 0,
+        conditions: [{ id: "cond-1", field: "country", operator: "equals", value: "FR" }],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRule),
+      });
+
+      const result = await client.createLinkRule(linkId, {
+        label: "FR rule",
+        destinationUrl: "https://example.com/fr",
+        matchType: "all",
+        conditions: [{ field: "country", operator: "equals", value: "FR" }],
+      });
+
+      expect(result.id).toBe("rule-new");
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/api/link/${linkId}/rules`),
+        expect.objectContaining({ method: "POST" })
+      );
+    });
+
+    it("should create an A/B testing variant with weight", async () => {
+      const mockRule = {
+        id: "ab-1", linkId, priority: 1, label: "Variante A",
+        destinationUrl: "https://example.com/a", matchType: "all",
+        isActive: true, weight: 50, conditions: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRule),
+      });
+
+      const result = await client.createLinkRule(linkId, {
+        label: "Variante A",
+        destinationUrl: "https://example.com/a",
+        weight: 50,
+        conditions: [],
+      });
+
+      expect(result.weight).toBe(50);
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.weight).toBe(50);
+    });
+
+    it("should update a rule with new weight", async () => {
+      const mockRule = {
+        id: "ab-1", linkId, priority: 1, label: "Variante A",
+        destinationUrl: "https://example.com/a", matchType: "all",
+        isActive: true, weight: 70, conditions: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRule),
+      });
+
+      const result = await client.updateLinkRule(linkId, "ab-1", { weight: 70 });
+
+      expect(result.weight).toBe(70);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/api/link/${linkId}/rules/ab-1`),
+        expect.objectContaining({ method: "PATCH" })
+      );
+    });
+
+    it("should create rule with matchType any (OR logic)", async () => {
+      const mockRule = {
+        id: "or-rule", linkId, priority: 1, label: "OR Rule",
+        destinationUrl: "https://example.com/or", matchType: "any",
+        isActive: true, weight: 0,
+        conditions: [
+          { id: "c1", field: "country", operator: "equals", value: "FR" },
+          { id: "c2", field: "country", operator: "equals", value: "BE" },
+        ],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRule),
+      });
+
+      const result = await client.createLinkRule(linkId, {
+        label: "OR Rule",
+        destinationUrl: "https://example.com/or",
+        matchType: "any",
+        conditions: [
+          { field: "country", operator: "equals", value: "FR" },
+          { field: "country", operator: "equals", value: "BE" },
+        ],
+      });
+
+      expect(result.matchType).toBe("any");
+      expect(result.conditions).toHaveLength(2);
+    });
+
+    it("should delete a rule", async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ deleted: true }),
+      });
+
+      const result = await client.deleteLinkRule(linkId, "rule-1");
+
+      expect(result.deleted).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/api/link/${linkId}/rules/rule-1`),
+        expect.objectContaining({ method: "DELETE" })
+      );
+    });
+
+    it("should reorder rules", async () => {
+      const mockRules = [
+        { id: "rule-2", priority: 1 },
+        { id: "rule-1", priority: 2 },
+      ];
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRules),
+      });
+
+      await client.reorderLinkRules(linkId, ["rule-2", "rule-1"]);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/api/link/${linkId}/rules/reorder`),
+        expect.objectContaining({ method: "PUT" })
+      );
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.ruleIds).toEqual(["rule-2", "rule-1"]);
+    });
+  });
 });
