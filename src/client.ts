@@ -11,6 +11,9 @@ import {
   QRCodeSvgResponse,
   QRCodeFormat,
   LinkCreatedType,
+  LinkRule,
+  CreateLinkRuleDto,
+  UpdateLinkRuleDto,
 } from "./types";
 
 export class HoulaClient {
@@ -119,6 +122,39 @@ export class HoulaClient {
 
   async getQRCodeSvg(key: string, options?: Omit<QRCodeOptions, "format">): Promise<QRCodeSvgResponse> {
     return this.getQRCode(key, { ...options, format: QRCodeFormat.SVG }) as Promise<QRCodeSvgResponse>;
+  }
+
+  // ─── Smart Routing (Link Rules) ───
+
+  async getLinkRules(linkId: string): Promise<LinkRule[]> {
+    return this.request<LinkRule[]>(`/api/link/${linkId}/rules`);
+  }
+
+  async createLinkRule(linkId: string, data: CreateLinkRuleDto): Promise<LinkRule> {
+    return this.request<LinkRule>(`/api/link/${linkId}/rules`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateLinkRule(linkId: string, ruleId: string, data: UpdateLinkRuleDto): Promise<LinkRule> {
+    return this.request<LinkRule>(`/api/link/${linkId}/rules/${ruleId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteLinkRule(linkId: string, ruleId: string): Promise<{ deleted: boolean }> {
+    return this.request<{ deleted: boolean }>(`/api/link/${linkId}/rules/${ruleId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async reorderLinkRules(linkId: string, ruleIds: string[]): Promise<LinkRule[]> {
+    return this.request<LinkRule[]>(`/api/link/${linkId}/rules/reorder`, {
+      method: "PUT",
+      body: JSON.stringify({ ruleIds }),
+    });
   }
 }
 

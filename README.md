@@ -16,6 +16,7 @@
 - **UTM tracking** - Built-in UTM parameter support for marketing campaigns
 - **Ephemeral links** - Create self-destructing links (1h to 48h)
 - **Custom keys** - Choose your own short URL keys
+- **Smart Routing** - Redirect visitors based on country, device, language, time, and more
 - **No ads** - Clean, fast redirects without any advertising
 
 ## Why this SDK?
@@ -177,6 +178,62 @@ const png = await houla.getQRCodePng("my-key", { width: 300 });
 const svg = await houla.getQRCodeSvg("my-key");
 ```
 
+## Smart Routing (Link Rules)
+
+Redirect visitors to different destinations based on their context (country, device, language, referrer, time, etc.).
+
+```typescript
+// List rules for a link
+const rules = await houla.getLinkRules("link-uuid");
+
+// Create a routing rule
+const rule = await houla.createLinkRule("link-uuid", {
+  label: "Mobile FR visitors",
+  destinationUrl: "https://m.site.fr/promo",
+  matchType: "all", // "all" = AND, "any" = OR
+  conditions: [
+    { field: "country", operator: "equals", value: "FR" },
+    { field: "device", operator: "equals", value: "mobile" },
+  ],
+});
+
+// Update a rule
+await houla.updateLinkRule("link-uuid", rule.id, {
+  label: "Mobile FR + ES visitors",
+  conditions: [
+    { field: "country", operator: "in", value: '["FR","ES"]' },
+    { field: "device", operator: "equals", value: "mobile" },
+  ],
+});
+
+// Reorder rules (priority)
+await houla.reorderLinkRules("link-uuid", ["rule-id-2", "rule-id-1"]);
+
+// Delete a rule
+await houla.deleteLinkRule("link-uuid", rule.id);
+```
+
+### Available condition fields
+
+| Field | Description |
+|-------|-------------|
+| `country` | ISO country code (FR, US, DE...) |
+| `continent` | EU, NA, SA, AS, AF, OC, AN |
+| `region` | Region/State name |
+| `city` | City name |
+| `device` | mobile, tablet, desktop |
+| `os` | Windows, macOS, iOS, Android, Linux |
+| `browser` | Chrome, Firefox, Safari, Edge... |
+| `language` | ISO 639-1 code (fr, en, es...) |
+| `referrer` | Referrer hostname |
+| `social_media` | TikTok, Instagram, Facebook, Twitter/X... |
+| `day_of_week` | monday through sunday |
+| `hour` | 0–23 (UTC) |
+| `date_range` | Date range (ISO format) |
+| `is_bot` | true/false |
+| `is_first_visit` | true/false (cookie-based) |
+| `visit_count` | Number of visits |
+
 ## Framework Examples
 
 ### Next.js (App Router)
@@ -238,6 +295,7 @@ export class LinkService {
 | **Custom keys** | FREE | Paid | Paid | Paid |
 | **API access** | FREE | Paid | Paid | Paid |
 | **Ephemeral links** | FREE | No | No | No |
+| **Smart Routing** | FREE | Enterprise only | No | Paid |
 
 ## Get Your FREE API Key
 

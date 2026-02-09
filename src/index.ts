@@ -28,4 +28,11 @@ export type {
   QRCodeSvgResponse,
   CheckAvailabilityResponse,
   DeleteLinkResponse,
+  LinkRule,
+  LinkRuleCondition,
+  CreateLinkRuleDto,
+  UpdateLinkRuleDto,
+  RuleMatchType,
+  RuleConditionField,
+  RuleConditionOperator,
 } from "./types";

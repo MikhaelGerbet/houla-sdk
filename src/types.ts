@@ -154,3 +154,58 @@ export interface DeleteLinkResponse {
   keyReleased?: boolean;
   archivedKey?: string;
 }
+
+// ─── Smart Routing (Link Rules) ───
+
+export type RuleMatchType = "all" | "any";
+
+export type RuleConditionField =
+  | "country" | "continent" | "region" | "city"
+  | "device" | "os" | "browser" | "language"
+  | "referrer" | "social_media"
+  | "day_of_week" | "hour" | "date_range"
+  | "is_bot" | "is_first_visit" | "visit_count";
+
+export type RuleConditionOperator =
+  | "equals" | "not_equals"
+  | "contains" | "not_contains"
+  | "in" | "not_in"
+  | "starts_with"
+  | "greater_than" | "less_than"
+  | "between" | "not_between";
+
+export interface LinkRuleCondition {
+  id?: string;
+  field: RuleConditionField;
+  operator: RuleConditionOperator;
+  value: string;
+}
+
+export interface LinkRule {
+  id: string;
+  linkId: string;
+  priority: number;
+  label: string;
+  destinationUrl: string;
+  matchType: RuleMatchType;
+  isActive: boolean;
+  conditions: LinkRuleCondition[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateLinkRuleDto {
+  label: string;
+  destinationUrl: string;
+  matchType?: RuleMatchType;
+  isActive?: boolean;
+  conditions: Omit<LinkRuleCondition, "id">[];
+}
+
+export interface UpdateLinkRuleDto {
+  label?: string;
+  destinationUrl?: string;
+  matchType?: RuleMatchType;
+  isActive?: boolean;
+  conditions?: Omit<LinkRuleCondition, "id">[];
+}
