@@ -219,3 +219,103 @@ export interface UpdateLinkRuleDto {
   weight?: number;
   conditions?: Omit<LinkRuleCondition, "id">[];
 }
+
+// ─── Webhooks ───
+
+export enum WebhookEvent {
+  LINK_CLICKED = "link.clicked",
+  LINK_CREATED = "link.created",
+  LINK_UPDATED = "link.updated",
+  LINK_DELETED = "link.deleted",
+  LINK_HEALTH_CHANGED = "link.health_changed",
+  LINK_SAFETY_CHANGED = "link.safety_changed",
+  LINK_EXPIRED = "link.expired",
+  LINK_PASSWORD_ATTEMPT = "link.password_attempt",
+  PROFILE_VISITED = "profile.visited",
+  PROFILE_LINK_CLICKED = "profile.link_clicked",
+}
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: WebhookEvent[];
+  enabled: boolean;
+  consecutiveFailures: number;
+  disabledReason?: string;
+  disabledAt?: string;
+  linkId?: string;
+  tagId?: string;
+  batchSize: number;
+  batchDelayMs: number;
+  samplingRate: number;
+  anonymizeIp: boolean;
+  excludeGeoCity: boolean;
+  totalDelivered: number;
+  totalFailed: number;
+  lastDeliveredAt?: string;
+  lastFailedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WebhookWithSecret extends Webhook {
+  secret: string;
+}
+
+export interface CreateWebhookDto {
+  name: string;
+  url: string;
+  events: WebhookEvent[];
+  linkId?: string;
+  tagId?: string;
+  batchSize?: number;
+  batchDelayMs?: number;
+  samplingRate?: number;
+  anonymizeIp?: boolean;
+  excludeGeoCity?: boolean;
+}
+
+export interface UpdateWebhookDto {
+  name?: string;
+  url?: string;
+  events?: WebhookEvent[];
+  linkId?: string;
+  tagId?: string;
+  batchSize?: number;
+  batchDelayMs?: number;
+  samplingRate?: number;
+  anonymizeIp?: boolean;
+  excludeGeoCity?: boolean;
+}
+
+export interface WebhookLog {
+  id: string;
+  webhookId: string;
+  event: WebhookEvent;
+  payload?: Record<string, any>;
+  eventCount: number;
+  success: boolean;
+  httpStatus?: number;
+  responseTimeMs?: number;
+  errorMessage?: string;
+  attempt: number;
+  createdAt: string;
+}
+
+export interface WebhookStats {
+  totalWebhooks: number;
+  activeWebhooks: number;
+  disabledWebhooks: number;
+  totalDelivered24h: number;
+  totalFailed24h: number;
+  successRate: number;
+}
+
+export interface TestWebhookResult {
+  success: boolean;
+  httpStatus?: number;
+  responseTimeMs?: number;
+  errorMessage?: string;
+}
+

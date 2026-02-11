@@ -8,6 +8,9 @@ import {
   LinkStatus,
   LinkHealthStatus,
   Link,
+  WebhookEvent,
+  Webhook,
+  WebhookWithSecret,
 } from "../types";
 
 // Mock fetch globally
@@ -1155,6 +1158,277 @@ describe("HoulaClient", () => {
         (mockFetch.mock.calls[0][1] as RequestInit).body as string
       );
       expect(body.ruleIds).toEqual(["rule-2", "rule-1"]);
+    });
+  });
+
+  // ==================== Webhook Tests ====================
+  describe("Webhooks", () => {
+    const createMockWebhook = (overrides: Partial<Webhook> = {}): Webhook => ({
+      id: "wh-uuid-123",
+      name: "Test Webhook",
+      url: "https://example.com/webhook",
+      events: [WebhookEvent.LINK_CLICKED, WebhookEvent.LINK_CREATED],
+      enabled: true,
+      consecutiveFailures: 0,
+      batchSize: 1,
+      batchDelayMs: 0,
+      samplingRate: 100,
+      anonymizeIp: false,
+      excludeGeoCity: false,
+      totalDelivered: 42,
+      totalFailed: 3,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...overrides,
+    });
+
+    describe("getWebhooks", () => {
+      it("should fetch all webhooks", async () => {
+        const mockWebhooks = [createMockWebhook()];
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockWebhooks),
+        });
+
+        const result = await client.getWebhooks();
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook"),
+          expect.objectContaining({
+            headers: expect.objectContaining({ "X-API-Key": mockConfig.apiKey }),
+          })
+        );
+        expect(result).toEqual(mockWebhooks);
+      });
+    });
+
+    describe("getWebhookById", () => {
+      it("should fetch a webhook by ID", async () => {
+        const mockWebhook = createMockWebhook();
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockWebhook),
+        });
+
+        const result = await client.getWebhookById("wh-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123"),
+          expect.any(Object)
+        );
+        expect(result).toEqual(mockWebhook);
+      });
+    });
+
+    describe("createWebhook", () => {
+      it("should create a webhook and return secret", async () => {
+        const mockResponse: WebhookWithSecret = {
+          ...createMockWebhook(),
+          secret: "whsec_abcdef123456",
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        const result = await client.createWebhook({
+          name: "Test Webhook",
+          url: "https://example.com/webhook",
+          events: [WebhookEvent.LINK_CLICKED],
+        });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook"),
+          expect.objectContaining({ method: "POST" })
+        );
+        expect(result.secret).toBe("whsec_abcdef123456");
+      });
+    });
+
+    describe("updateWebhook", () => {
+      it("should update a webhook", async () => {
+        const mockResponse = createMockWebhook({ name: "Updated" });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        await client.updateWebhook("wh-uuid-123", { name: "Updated" });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123"),
+          expect.objectContaining({ method: "PATCH" })
+        );
+      });
+    });
+
+    describe("deleteWebhook", () => {
+      it("should delete a webhook", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ deleted: true }),
+        });
+
+        const result = await client.deleteWebhook("wh-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123"),
+          expect.objectContaining({ method: "DELETE" })
+        );
+        expect(result.deleted).toBe(true);
+      });
+    });
+
+    describe("enableWebhook", () => {
+      it("should enable a webhook", async () => {
+        const mockResponse = createMockWebhook({ enabled: true });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        const result = await client.enableWebhook("wh-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123/enable"),
+          expect.objectContaining({ method: "POST" })
+        );
+        expect(result.enabled).toBe(true);
+      });
+    });
+
+    describe("disableWebhook", () => {
+      it("should disable a webhook", async () => {
+        const mockResponse = createMockWebhook({ enabled: false });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        const result = await client.disableWebhook("wh-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123/disable"),
+          expect.objectContaining({ method: "POST" })
+        );
+        expect(result.enabled).toBe(false);
+      });
+    });
+
+    describe("testWebhook", () => {
+      it("should test a webhook", async () => {
+        const mockResult = { success: true, httpStatus: 200, responseTimeMs: 150 };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResult),
+        });
+
+        const result = await client.testWebhook("wh-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123/test"),
+          expect.objectContaining({ method: "POST" })
+        );
+        expect(result.success).toBe(true);
+        expect(result.httpStatus).toBe(200);
+      });
+    });
+
+    describe("regenerateWebhookSecret", () => {
+      it("should regenerate the webhook secret", async () => {
+        const mockResponse: WebhookWithSecret = {
+          ...createMockWebhook(),
+          secret: "whsec_new_secret_456",
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        const result = await client.regenerateWebhookSecret("wh-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123/regenerate-secret"),
+          expect.objectContaining({ method: "POST" })
+        );
+        expect(result.secret).toBe("whsec_new_secret_456");
+      });
+    });
+
+    describe("getWebhookSecret", () => {
+      it("should get the webhook secret", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ secret: "whsec_my_secret" }),
+        });
+
+        const result = await client.getWebhookSecret("wh-uuid-123");
+
+        expect(result.secret).toBe("whsec_my_secret");
+      });
+    });
+
+    describe("getWebhookLogs", () => {
+      it("should fetch webhook logs with pagination", async () => {
+        const mockResponse = {
+          data: [{ id: "log-1", event: WebhookEvent.LINK_CLICKED, success: true }],
+          total: 1,
+          page: 1,
+          pageCount: 1,
+          count: 1,
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        const result = await client.getWebhookLogs("wh-uuid-123", 1, 20);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/wh-uuid-123/logs?page=1&limit=20"),
+          expect.any(Object)
+        );
+        expect(result.data).toHaveLength(1);
+      });
+
+      it("should filter logs by success status", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: [], total: 0, page: 1, pageCount: 0, count: 0 }),
+        });
+
+        await client.getWebhookLogs("wh-uuid-123", 1, 20, false);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("success=false"),
+          expect.any(Object)
+        );
+      });
+    });
+
+    describe("getWebhookStats", () => {
+      it("should fetch webhook stats", async () => {
+        const mockStats = {
+          totalWebhooks: 5,
+          activeWebhooks: 3,
+          disabledWebhooks: 2,
+          totalDelivered24h: 100,
+          totalFailed24h: 5,
+          successRate: 95.24,
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockStats),
+        });
+
+        const result = await client.getWebhookStats();
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/webhook/stats"),
+          expect.any(Object)
+        );
+        expect(result.totalWebhooks).toBe(5);
+      });
     });
   });
 });

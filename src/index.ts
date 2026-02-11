@@ -14,6 +14,7 @@ export {
   SafetyStatus,
   QRCodeFormat,
   QRCodeErrorCorrectionLevel,
+  WebhookEvent,
 } from "./types";
 
 // Types - Interfaces
@@ -35,4 +36,11 @@ export type {
   RuleMatchType,
   RuleConditionField,
   RuleConditionOperator,
+  Webhook,
+  WebhookWithSecret,
+  CreateWebhookDto,
+  UpdateWebhookDto,
+  WebhookLog,
+  WebhookStats,
+  TestWebhookResult,
 } from "./types";

@@ -14,6 +14,13 @@ import {
   LinkRule,
   CreateLinkRuleDto,
   UpdateLinkRuleDto,
+  Webhook,
+  WebhookWithSecret,
+  CreateWebhookDto,
+  UpdateWebhookDto,
+  WebhookLog,
+  WebhookStats,
+  TestWebhookResult,
 } from "./types";
 
 export class HoulaClient {
@@ -155,6 +162,77 @@ export class HoulaClient {
       method: "PUT",
       body: JSON.stringify({ ruleIds }),
     });
+  }
+
+  // ─── Webhooks ───
+
+  async getWebhooks(): Promise<Webhook[]> {
+    return this.request<Webhook[]>("/api/manager/webhook");
+  }
+
+  async getWebhookById(id: string): Promise<Webhook> {
+    return this.request<Webhook>(`/api/manager/webhook/${id}`);
+  }
+
+  async createWebhook(data: CreateWebhookDto): Promise<WebhookWithSecret> {
+    return this.request<WebhookWithSecret>("/api/manager/webhook", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateWebhook(id: string, data: UpdateWebhookDto): Promise<Webhook> {
+    return this.request<Webhook>(`/api/manager/webhook/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteWebhook(id: string): Promise<{ deleted: boolean }> {
+    return this.request<{ deleted: boolean }>(`/api/manager/webhook/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  async enableWebhook(id: string): Promise<Webhook> {
+    return this.request<Webhook>(`/api/manager/webhook/${id}/enable`, {
+      method: "POST",
+    });
+  }
+
+  async disableWebhook(id: string): Promise<Webhook> {
+    return this.request<Webhook>(`/api/manager/webhook/${id}/disable`, {
+      method: "POST",
+    });
+  }
+
+  async testWebhook(id: string): Promise<TestWebhookResult> {
+    return this.request<TestWebhookResult>(`/api/manager/webhook/${id}/test`, {
+      method: "POST",
+    });
+  }
+
+  async regenerateWebhookSecret(id: string): Promise<WebhookWithSecret> {
+    return this.request<WebhookWithSecret>(`/api/manager/webhook/${id}/regenerate-secret`, {
+      method: "POST",
+    });
+  }
+
+  async getWebhookSecret(id: string): Promise<{ secret: string }> {
+    return this.request<{ secret: string }>(`/api/manager/webhook/${id}/secret`);
+  }
+
+  async getWebhookLogs(id: string, page = 1, limit = 20, success?: boolean): Promise<PaginatedResponse<WebhookLog>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: Math.min(limit, 100).toString(),
+    });
+    if (success !== undefined) params.set("success", success.toString());
+    return this.request<PaginatedResponse<WebhookLog>>(`/api/manager/webhook/${id}/logs?${params}`);
+  }
+
+  async getWebhookStats(): Promise<WebhookStats> {
+    return this.request<WebhookStats>("/api/manager/webhook/stats");
   }
 }
 
