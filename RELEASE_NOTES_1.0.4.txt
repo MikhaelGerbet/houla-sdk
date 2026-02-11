@@ -1,0 +1,66 @@
+## 🚀 New Features
+
+### Smart Routing (Link Rules)
+Redirect visitors to different destinations based on their context — country, device, language, referrer, time, and more.
+
+```typescript
+const rule = await houla.createLinkRule("link-uuid", {
+  label: "Mobile FR visitors",
+  destinationUrl: "https://m.site.fr/promo",
+  matchType: "all",
+  conditions: [
+    { field: "country", operator: "equals", value: "FR" },
+    { field: "device", operator: "equals", value: "mobile" },
+  ],
+});
+```
+
+New methods: `getLinkRules()`, `createLinkRule()`, `updateLinkRule()`, `deleteLinkRule()`, `reorderLinkRules()`
+
+### A/B Testing
+Create weighted variants via the `weight` field on rules. Rules with weights and no conditions are automatically treated as A/B test variants.
+
+```typescript
+await houla.createLinkRule("link-uuid", {
+  label: "Variant A",
+  destinationUrl: "https://example.com/page-a",
+  weight: 60,
+  conditions: [],
+});
+```
+
+### Webhooks
+Full webhook management with real-time HTTP notifications for **10 event types**, including Link-in-Bio exclusives (`profile.visited`, `profile.link_clicked`).
+
+```typescript
+const webhook = await houla.createWebhook({
+  name: "My Integration",
+  url: "https://my-app.com/webhooks/houla",
+  events: ["link.clicked", "link.created"],
+  anonymizeIp: true,
+});
+console.log(webhook.secret); // whsec_xxx
+```
+
+New methods: `getWebhooks()`, `getWebhookById()`, `createWebhook()`, `updateWebhook()`, `deleteWebhook()`, `enableWebhook()`, `disableWebhook()`, `testWebhook()`, `getWebhookLogs()`, `getWebhookStats()`, `regenerateWebhookSecret()`, `getWebhookSecret()`
+
+### Password-Protected Links
+New `password` option in `createLink()`.
+
+```typescript
+const link = await houla.createLink({
+  url: "https://example.com/private",
+  password: "secret123",
+});
+```
+
+## ⚠️ Breaking Changes
+
+- **QR Code methods now use link `id` instead of `key`**: `getQRCode(id)`, `getQRCodePng(id)`, `getQRCodeSvg(id)`
+- **`getLinkById()` route updated**: `/api/link/by-id/:id` → `/api/link/:id`
+
+## 📦 New Exports
+
+**Enum:** `WebhookEvent`
+
+**Types:** `LinkRule`, `LinkRuleCondition`, `CreateLinkRuleDto`, `UpdateLinkRuleDto`, `RuleMatchType`, `RuleConditionField`, `RuleConditionOperator`, `Webhook`, `WebhookWithSecret`, `CreateWebhookDto`, `UpdateWebhookDto`, `WebhookLog`, `WebhookStats`, `TestWebhookResult`
