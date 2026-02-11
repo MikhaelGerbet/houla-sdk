@@ -17,6 +17,7 @@
 - **Ephemeral links** - Create self-destructing links (1h to 48h)
 - **Custom keys** - Choose your own short URL keys
 - **Smart Routing** - Redirect visitors based on country, device, language, time, and more
+- **Webhooks** - Real-time HTTP notifications for 10 event types (including Link-in-Bio exclusives)
 - **No ads** - Clean, fast redirects without any advertising
 
 ## Why this SDK?
@@ -264,6 +265,100 @@ await houla.createLinkRule("link-uuid", {
 
 > **Note:** The total weights should equal 100% for predictable distribution. Weights exceeding 100% are refused by the UI.
 
+## Webhooks
+
+Receive real-time HTTP notifications when events occur on your links or Link-in-Bio pages.
+
+```typescript
+// Create a webhook
+const webhook = await houla.createWebhook({
+  name: "My Integration",
+  url: "https://my-app.com/webhooks/houla",
+  events: ["link.clicked", "link.created"],
+  anonymizeIp: true,       // GDPR: anonymize IP addresses
+  excludeGeoCity: true,    // GDPR: exclude city from geo data
+});
+console.log(webhook.secret); // whsec_xxx — save this securely!
+
+// List webhooks
+const webhooks = await houla.getWebhooks();
+
+// Update a webhook
+await houla.updateWebhook(webhook.id, {
+  name: "Updated Integration",
+  events: ["link.clicked", "link.created", "link.deleted"],
+});
+
+// Enable / Disable
+await houla.enableWebhook(webhook.id);
+await houla.disableWebhook(webhook.id);
+
+// Test a webhook
+const test = await houla.testWebhook(webhook.id);
+console.log(test.success, test.responseTimeMs);
+
+// Get delivery logs (paginated, filterable)
+const logs = await houla.getWebhookLogs(webhook.id, 1, 20, true); // success only
+
+// Regenerate secret
+const updated = await houla.regenerateWebhookSecret(webhook.id);
+console.log(updated.secret); // new secret
+
+// Get current secret
+const { secret } = await houla.getWebhookSecret(webhook.id);
+
+// Delete
+await houla.deleteWebhook(webhook.id);
+```
+
+### Webhook Create Options
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | `string` | **Yes** | Descriptive name (max 100 chars) |
+| `url` | `string` | **Yes** | Destination URL (HTTPS required in production) |
+| `events` | `string[]` | **Yes** | Events to listen to (at least 1) |
+| `linkId` | `string` | No | UUID of a specific link to watch |
+| `tagId` | `string` | No | UUID of a tag to filter events |
+| `batchSize` | `number` | No | Batch size (1-100, default: 1) |
+| `batchDelayMs` | `number` | No | Max delay before batch flush in ms (0-60000) |
+| `samplingRate` | `number` | No | Percentage of events to send (1-100, default: 100) |
+| `anonymizeIp` | `boolean` | No | Anonymize IP in payloads (GDPR) |
+| `excludeGeoCity` | `boolean` | No | Exclude city from geo data (GDPR) |
+
+### Available Events
+
+| Event | Description |
+|-------|-------------|
+| `link.clicked` | A link was clicked |
+| `link.created` | A link was created |
+| `link.updated` | A link was updated |
+| `link.deleted` | A link was deleted |
+| `link.health_changed` | Link health status changed |
+| `link.safety_changed` | Link safety status changed |
+| `link.expired` | An ephemeral link expired |
+| `link.password_attempt` | Password attempt on a protected link |
+| `profile.visited` | A Link-in-Bio page was visited |
+| `profile.link_clicked` | A link was clicked on a Link-in-Bio page |
+
+> **Exclusive:** `profile.visited` and `profile.link_clicked` events are only available on Hou.la.
+
+### Signature Verification
+
+Every webhook request includes an `X-Houla-Signature` header (HMAC-SHA256). Verify it to ensure authenticity:
+
+```typescript
+import crypto from "crypto";
+
+function verifySignature(body: any, signature: string, secret: string): boolean {
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(JSON.stringify(body))
+    .digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
+```
+
 ## Framework Examples
 
 ### Next.js (App Router)
@@ -329,6 +424,7 @@ export class LinkService {
 | **A/B Testing** | FREE | Enterprise only | No | Paid |
 | **Password links** | FREE | Paid | No | Paid |
 | **Enhanced security** | FREE | No | No | No |
+| **Webhooks** | FREE (10 events) | Enterprise only | No | Paid |
 
 ## Get Your FREE API Key
 
