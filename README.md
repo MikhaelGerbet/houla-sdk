@@ -162,7 +162,7 @@ console.log(protectedLink.hasPassword); // true
 // Enhanced security protection included
 
 // Generate QR Code separately
-const qr = await houla.getQRCodePng(link.key, { width: 300 });
+const qr = await houla.getQRCodePng(link.id, { width: 300 });
 console.log(qr.dataUrl); // data:image/png;base64,...
 ```
 
@@ -186,8 +186,8 @@ await houla.deleteLink("uuid");
 const { available } = await houla.checkAvailability("my-key");
 
 // Generate QR code for existing link
-const png = await houla.getQRCodePng("my-key", { width: 300 });
-const svg = await houla.getQRCodeSvg("my-key");
+const png = await houla.getQRCodePng("link-uuid", { width: 300 });
+const svg = await houla.getQRCodeSvg("link-uuid");
 ```
 
 ## Smart Routing (Link Rules)
@@ -373,7 +373,7 @@ const houla = new HoulaClient({ apiKey: process.env.HOULA_API_KEY! });
 export async function POST(request: Request) {
   const { url } = await request.json();
   const link = await houla.createLink({ url });
-  const qr = await houla.getQRCodePng(link.key);
+  const qr = await houla.getQRCodePng(link.id);
   return NextResponse.json({ shortUrl: `https://hou.la/${link.key}`, qr: qr.dataUrl });
 }
 ```

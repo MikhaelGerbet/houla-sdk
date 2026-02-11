@@ -71,7 +71,7 @@ export class HoulaClient {
   }
 
   async getLinkById(id: string): Promise<Link> {
-    return this.request<Link>(`/api/link/by-id/${id}`);
+    return this.request<Link>(`/api/link/${id}`);
   }
 
   async getLinkByKey(key: string): Promise<Link> {
@@ -104,7 +104,7 @@ export class HoulaClient {
     });
   }
 
-  async getQRCode(key: string, options?: QRCodeOptions): Promise<QRCodePngResponse | QRCodeSvgResponse> {
+  async getQRCode(id: string, options?: QRCodeOptions): Promise<QRCodePngResponse | QRCodeSvgResponse> {
     const params = new URLSearchParams();
     if (options?.width) params.set("width", options.width.toString());
     if (options?.margin !== undefined) params.set("margin", options.margin.toString());
@@ -114,21 +114,17 @@ export class HoulaClient {
     if (options?.format) params.set("format", options.format);
 
     const queryString = params.toString();
-    const url = `${this.baseUrl}/${key}/qrcode${queryString ? `?${queryString}` : ""}`;
-    
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to generate QR code: ${response.statusText}`);
-    }
-    return response.json();
+    return this.request<QRCodePngResponse | QRCodeSvgResponse>(
+      `/api/link/${id}/qrcode${queryString ? `?${queryString}` : ""}`,
+    );
   }
 
-  async getQRCodePng(key: string, options?: Omit<QRCodeOptions, "format">): Promise<QRCodePngResponse> {
-    return this.getQRCode(key, { ...options, format: QRCodeFormat.PNG }) as Promise<QRCodePngResponse>;
+  async getQRCodePng(id: string, options?: Omit<QRCodeOptions, "format">): Promise<QRCodePngResponse> {
+    return this.getQRCode(id, { ...options, format: QRCodeFormat.PNG }) as Promise<QRCodePngResponse>;
   }
 
-  async getQRCodeSvg(key: string, options?: Omit<QRCodeOptions, "format">): Promise<QRCodeSvgResponse> {
-    return this.getQRCode(key, { ...options, format: QRCodeFormat.SVG }) as Promise<QRCodeSvgResponse>;
+  async getQRCodeSvg(id: string, options?: Omit<QRCodeOptions, "format">): Promise<QRCodeSvgResponse> {
+    return this.getQRCode(id, { ...options, format: QRCodeFormat.SVG }) as Promise<QRCodeSvgResponse>;
   }
 
   // ─── Smart Routing (Link Rules) ───

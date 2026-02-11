@@ -194,7 +194,7 @@ describe("HoulaClient", () => {
       const result = await client.getLinkById("test-uuid-456");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/link/by-id/test-uuid-456"),
+        expect.stringContaining("/api/link/test-uuid-456"),
         expect.any(Object)
       );
       expect(result).toEqual(mockLink);
@@ -599,10 +599,11 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.getQRCode("my-key");
+      const result = await client.getQRCode("test-uuid-123");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringMatching(/\/my-key\/qrcode$/)
+        expect.stringMatching(/\/test-uuid-123\/qrcode$/),
+        expect.any(Object)
       );
       expect(result).toEqual(mockResponse);
     });
@@ -613,10 +614,11 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve({ base64: "", dataUrl: "" }),
       });
 
-      await client.getQRCode("my-key", { width: 400 });
+      await client.getQRCode("test-uuid-123", { width: 400 });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("width=400")
+        expect.stringContaining("width=400"),
+        expect.any(Object)
       );
     });
 
@@ -626,10 +628,11 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve({ base64: "", dataUrl: "" }),
       });
 
-      await client.getQRCode("my-key", { margin: 2 });
+      await client.getQRCode("test-uuid-123", { margin: 2 });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("margin=2")
+        expect.stringContaining("margin=2"),
+        expect.any(Object)
       );
     });
 
@@ -639,7 +642,7 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve({ base64: "", dataUrl: "" }),
       });
 
-      await client.getQRCode("my-key", {
+      await client.getQRCode("test-uuid-123", {
         width: 300,
         margin: 2,
         darkColor: "#000000",
@@ -660,11 +663,13 @@ describe("HoulaClient", () => {
     it("should handle QR code generation error", async () => {
       mockFetch.mockResolvedValue({
         ok: false,
+        status: 404,
         statusText: "Not Found",
+        json: () => Promise.resolve({ message: "Link not found" }),
       });
 
-      await expect(client.getQRCode("invalid-key")).rejects.toThrow(
-        "Failed to generate QR code"
+      await expect(client.getQRCode("invalid-id")).rejects.toThrow(
+        "Link not found"
       );
     });
   });
@@ -679,10 +684,11 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.getQRCodePng("my-key");
+      const result = await client.getQRCodePng("test-uuid-123");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("format=png")
+        expect.stringContaining("format=png"),
+        expect.any(Object)
       );
       expect(result.base64).toBe("pngdata");
       expect(result.dataUrl).toContain("image/png");
@@ -694,7 +700,7 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve({ base64: "", dataUrl: "" }),
       });
 
-      await client.getQRCodePng("my-key", { width: 512, margin: 4 });
+      await client.getQRCodePng("test-uuid-123", { width: 512, margin: 4 });
 
       const calledUrl = mockFetch.mock.calls[0][0];
       expect(calledUrl).toContain("width=512");
@@ -713,10 +719,11 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.getQRCodeSvg("my-key");
+      const result = await client.getQRCodeSvg("test-uuid-123");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("format=svg")
+        expect.stringContaining("format=svg"),
+        expect.any(Object)
       );
       expect(result.svg).toBe("<svg>...</svg>");
     });
@@ -727,7 +734,7 @@ describe("HoulaClient", () => {
         json: () => Promise.resolve({ svg: "<svg>...</svg>" }),
       });
 
-      await client.getQRCodeSvg("my-key", {
+      await client.getQRCodeSvg("test-uuid-123", {
         darkColor: "#FF0000",
         lightColor: "#00FF00",
       });
