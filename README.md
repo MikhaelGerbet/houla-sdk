@@ -105,6 +105,9 @@ When no custom key is provided, the API auto-generates one:
 | `ephemeralDuration` | `EphemeralDuration` | No | Duration: `"1h"`, `"6h"`, `"12h"`, `"24h"`, `"48h"` |
 | `customExpiresAt` | `string` | No | Custom expiration date (ISO 8601). Mutually exclusive with `ephemeralDuration`. Key is NOT recycled. |
 | `password` | `string` | No | Password to protect the link (1-100 chars). Hashed with bcrypt. Enhanced security included. |
+| `fbPixelId` | `string` | No | Facebook/Meta Pixel ID (10-20 digits). Fires via intermediate page for humans. |
+| `googleTagId` | `string` | No | Google Tag ID (format: `G-XXX`, `AW-XXX`, `DC-XXX`, `UA-XXX`). Fires via gtag.js. |
+| `tiktokPixelId` | `string` | No | TikTok Pixel ID (format: `CXXX...`). Fires via intermediate page. |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
@@ -172,6 +175,16 @@ console.log(protectedLink.hasPassword); // true
 // Generate QR Code separately
 const qr = await houla.getQRCodePng(link.id, { width: 300 });
 console.log(qr.dataUrl); // data:image/png;base64,...
+
+// Link with retargeting pixels
+const trackedLink = await houla.createLink({
+  url: "https://example.com/landing",
+  fbPixelId: "1234567890",
+  googleTagId: "G-XXXXXXXXXX",
+  tiktokPixelId: "C1234567890123",
+});
+// Human visitors see a brief intermediate page (~800ms) where pixels fire,
+// then get redirected. Bots/crawlers receive a direct 301 redirect.
 ```
 
 ## Other Methods
@@ -434,6 +447,7 @@ export class LinkService {
 | **Password links** | FREE | Paid | No | Paid |
 | **Enhanced security** | FREE | No | No | No |
 | **Webhooks** | FREE (10 events) | Enterprise only | No | Paid |
+| **Retargeting Pixels** | FREE | Paid | No | Paid |
 
 ## Get Your FREE API Key
 

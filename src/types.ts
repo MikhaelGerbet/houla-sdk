@@ -84,6 +84,12 @@ export interface Link {
   healthStatus: LinkHealthStatus;
   safetyStatus?: SafetyStatus;
   hits?: HitsByDay[];
+  /** Facebook Pixel ID for retargeting */
+  fbPixelId?: string;
+  /** Google Tag ID (gtag.js) for retargeting */
+  googleTagId?: string;
+  /** TikTok Pixel ID for retargeting */
+  tiktokPixelId?: string;
 }
 
 export interface QRCodeOptions {
@@ -115,6 +121,12 @@ export interface CreateLinkDto {
   isPasswordProtected?: boolean;
   /** Password for protected link */
   password?: string;
+  /** Facebook Pixel ID (10-20 digits) for retargeting */
+  fbPixelId?: string;
+  /** Google Tag ID (G-XXX, AW-XXX, DC-XXX, UA-XXX) for retargeting */
+  googleTagId?: string;
+  /** TikTok Pixel ID (CXXX...) for retargeting */
+  tiktokPixelId?: string;
 }
 
 export interface UpdateLinkDto {
@@ -132,6 +144,12 @@ export interface UpdateLinkDto {
   ephemeralDuration?: EphemeralDuration;
   /** Custom expiration date (ISO 8601), or null to remove expiration */
   customExpiresAt?: string | null;
+  /** Facebook Pixel ID, or null to remove */
+  fbPixelId?: string | null;
+  /** Google Tag ID, or null to remove */
+  googleTagId?: string | null;
+  /** TikTok Pixel ID, or null to remove */
+  tiktokPixelId?: string | null;
 }
 
 export interface PaginatedResponse<T> {

@@ -1003,6 +1003,138 @@ describe("HoulaClient", () => {
     });
   });
 
+  // ==================== Retargeting Pixels ====================
+  describe("retargeting pixels", () => {
+    it("should create a link with Facebook Pixel", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({
+        url: "https://example.com",
+        fbPixelId: "1234567890123456",
+      });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.fbPixelId).toBe("1234567890123456");
+    });
+
+    it("should create a link with Google Tag", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({
+        url: "https://example.com",
+        googleTagId: "G-ABC123XYZ",
+      });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.googleTagId).toBe("G-ABC123XYZ");
+    });
+
+    it("should create a link with TikTok Pixel", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({
+        url: "https://example.com",
+        tiktokPixelId: "CABCDEF12345678901",
+      });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.tiktokPixelId).toBe("CABCDEF12345678901");
+    });
+
+    it("should create a link with all three pixels", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({
+        url: "https://example.com",
+        fbPixelId: "9876543210123456",
+        googleTagId: "AW-123456789",
+        tiktokPixelId: "CXYZ1234567890ABC",
+      });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.fbPixelId).toBe("9876543210123456");
+      expect(body.googleTagId).toBe("AW-123456789");
+      expect(body.tiktokPixelId).toBe("CXYZ1234567890ABC");
+    });
+
+    it("should not include pixel fields when not specified", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.createLink({ url: "https://example.com" });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.fbPixelId).toBeUndefined();
+      expect(body.googleTagId).toBeUndefined();
+      expect(body.tiktokPixelId).toBeUndefined();
+    });
+
+    it("should update a link to add pixels", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.updateLink("test-link-id", {
+        fbPixelId: "1111111111111111",
+        googleTagId: "G-UPDATED123",
+      });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.fbPixelId).toBe("1111111111111111");
+      expect(body.googleTagId).toBe("G-UPDATED123");
+    });
+
+    it("should update a link to remove pixels with null", async () => {
+      const mockLink = createMockLink();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockLink),
+      });
+
+      await client.updateLink("test-link-id", {
+        fbPixelId: null,
+      });
+
+      const body = JSON.parse(
+        (mockFetch.mock.calls[0][1] as RequestInit).body as string
+      );
+      expect(body.fbPixelId).toBeNull();
+    });
+  });
+
   // ==================== Smart Routing (Link Rules) ====================
   describe("smart routing rules", () => {
     const linkId = "test-link-uuid-123";
