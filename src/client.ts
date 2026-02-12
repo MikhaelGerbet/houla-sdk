@@ -21,6 +21,9 @@ import {
   WebhookLog,
   WebhookStats,
   TestWebhookResult,
+  PixelPreset,
+  CreatePixelPresetDto,
+  UpdatePixelPresetDto,
 } from "./types";
 
 export class HoulaClient {
@@ -229,6 +232,36 @@ export class HoulaClient {
 
   async getWebhookStats(): Promise<WebhookStats> {
     return this.request<WebhookStats>("/api/manager/webhook/stats");
+  }
+
+  // ─── Pixel Presets ───
+
+  async listPixelPresets(): Promise<PixelPreset[]> {
+    return this.request<PixelPreset[]>("/api/manager/pixel-preset");
+  }
+
+  async getPixelPreset(id: string): Promise<PixelPreset> {
+    return this.request<PixelPreset>(`/api/manager/pixel-preset/${id}`);
+  }
+
+  async createPixelPreset(data: CreatePixelPresetDto): Promise<PixelPreset> {
+    return this.request<PixelPreset>("/api/manager/pixel-preset", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePixelPreset(id: string, data: UpdatePixelPresetDto): Promise<PixelPreset> {
+    return this.request<PixelPreset>(`/api/manager/pixel-preset/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePixelPreset(id: string): Promise<void> {
+    await this.request<void>(`/api/manager/pixel-preset/${id}`, {
+      method: "DELETE",
+    });
   }
 }
 

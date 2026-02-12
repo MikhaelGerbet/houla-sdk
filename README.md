@@ -380,6 +380,66 @@ function verifySignature(body: any, signature: string, secret: string): boolean 
 }
 ```
 
+## Pixel Presets
+
+Save and reuse retargeting pixel configurations. Presets let you quickly apply your Facebook, Google, and TikTok pixel IDs when creating links.
+
+```typescript
+// List all presets
+const presets = await houla.listPixelPresets();
+
+// Create a preset
+const preset = await houla.createPixelPreset({
+  name: "E-commerce Campaign",
+  isDefault: true,
+  fbPixelId: "1234567890",
+  googleTagId: "G-XXXXXXXXXX",
+  tiktokPixelId: "C1234567890123",
+});
+
+// Get a single preset
+const single = await houla.getPixelPreset(preset.id);
+
+// Update a preset
+await houla.updatePixelPreset(preset.id, {
+  name: "E-commerce Campaign v2",
+  googleTagId: "G-YYYYYYYYYY",
+});
+
+// Delete a preset
+await houla.deletePixelPreset(preset.id);
+```
+
+### Preset Create Options
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | `string` | **Yes** | Descriptive name (1-100 chars, unique per user) |
+| `isDefault` | `boolean` | No | Mark as default preset (auto-applied on link creation) |
+| `fbPixelId` | `string` | No | Facebook Pixel ID (10-20 digits) |
+| `googleTagId` | `string` | No | Google Tag ID (G-xxx, AW-xxx, DC-xxx, UA-xxx) |
+| `tiktokPixelId` | `string` | No | TikTok Pixel ID (starts with C, 11-31 chars) |
+
+> **Note:** At least one pixel ID is required per preset.
+
+### Using Presets with Links
+
+```typescript
+// Get the default preset
+const presets = await houla.listPixelPresets();
+const defaultPreset = presets.find((p) => p.isDefault);
+
+// Apply preset values when creating a link
+if (defaultPreset) {
+  const link = await houla.createLink({
+    url: "https://example.com/landing",
+    fbPixelId: defaultPreset.fbPixelId,
+    googleTagId: defaultPreset.googleTagId,
+    tiktokPixelId: defaultPreset.tiktokPixelId,
+  });
+}
+```
+
 ## Framework Examples
 
 ### Next.js (App Router)
@@ -448,6 +508,7 @@ export class LinkService {
 | **Enhanced security** | FREE | No | No | No |
 | **Webhooks** | FREE (10 events) | Enterprise only | No | Paid |
 | **Retargeting Pixels** | FREE | Paid | No | Paid |
+| **Pixel Presets** | FREE | No | No | No |
 
 ## Get Your FREE API Key
 

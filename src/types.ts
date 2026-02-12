@@ -341,3 +341,47 @@ export interface TestWebhookResult {
   errorMessage?: string;
 }
 
+// ─── Pixel Presets ───
+
+export interface PixelPreset {
+  id: string;
+  /** Display name for this preset */
+  name: string;
+  /** Whether this preset is automatically applied to new links */
+  isDefault: boolean;
+  /** Facebook Pixel ID (10-20 digits) */
+  fbPixelId?: string;
+  /** Google Tag ID (G-XXX, AW-XXX, DC-XXX, UA-XXX) */
+  googleTagId?: string;
+  /** TikTok Pixel ID (CXXX...) */
+  tiktokPixelId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePixelPresetDto {
+  /** Display name for the preset */
+  name: string;
+  /** Set as default preset for new links */
+  isDefault?: boolean;
+  /** Facebook Pixel ID (10-20 digits) */
+  fbPixelId?: string;
+  /** Google Tag ID (G-XXX, AW-XXX, DC-XXX, UA-XXX) */
+  googleTagId?: string;
+  /** TikTok Pixel ID (CXXX...) */
+  tiktokPixelId?: string;
+}
+
+export interface UpdatePixelPresetDto {
+  /** Display name for the preset */
+  name?: string;
+  /** Set as default preset for new links */
+  isDefault?: boolean;
+  /** Facebook Pixel ID, or null to remove */
+  fbPixelId?: string | null;
+  /** Google Tag ID, or null to remove */
+  googleTagId?: string | null;
+  /** TikTok Pixel ID, or null to remove */
+  tiktokPixelId?: string | null;
+}
+

@@ -11,6 +11,7 @@ import {
   WebhookEvent,
   Webhook,
   WebhookWithSecret,
+  PixelPreset,
 } from "../types";
 
 // Mock fetch globally
@@ -1567,6 +1568,192 @@ describe("HoulaClient", () => {
           expect.any(Object)
         );
         expect(result.totalWebhooks).toBe(5);
+      });
+    });
+  });
+
+  // ==================== Pixel Preset Tests ====================
+  describe("Pixel Presets", () => {
+    const createMockPreset = (overrides: Partial<PixelPreset> = {}): PixelPreset => ({
+      id: "pp-uuid-123",
+      name: "Test Preset",
+      isDefault: false,
+      fbPixelId: "1234567890",
+      googleTagId: "G-XXXXXXXXXX",
+      tiktokPixelId: "C1234567890123",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...overrides,
+    });
+
+    describe("listPixelPresets", () => {
+      it("should fetch all pixel presets", async () => {
+        const mockPresets = [createMockPreset(), createMockPreset({ id: "pp-uuid-456", name: "Preset 2" })];
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockPresets),
+        });
+
+        const result = await client.listPixelPresets();
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/pixel-preset"),
+          expect.objectContaining({
+            headers: expect.objectContaining({ "X-API-Key": mockConfig.apiKey }),
+          })
+        );
+        expect(result).toEqual(mockPresets);
+        expect(result).toHaveLength(2);
+      });
+
+      it("should return empty array when no presets exist", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([]),
+        });
+
+        const result = await client.listPixelPresets();
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe("getPixelPreset", () => {
+      it("should fetch a preset by ID", async () => {
+        const mockPreset = createMockPreset();
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockPreset),
+        });
+
+        const result = await client.getPixelPreset("pp-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/pixel-preset/pp-uuid-123"),
+          expect.any(Object)
+        );
+        expect(result).toEqual(mockPreset);
+      });
+
+      it("should handle 404 for non-existent preset", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          json: () => Promise.resolve({ message: "Preset non trouvé" }),
+        });
+
+        await expect(client.getPixelPreset("non-existent")).rejects.toThrow();
+      });
+    });
+
+    describe("createPixelPreset", () => {
+      it("should create a preset with all pixels", async () => {
+        const mockPreset = createMockPreset({ isDefault: true });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockPreset),
+        });
+
+        const result = await client.createPixelPreset({
+          name: "Test Preset",
+          isDefault: true,
+          fbPixelId: "1234567890",
+          googleTagId: "G-XXXXXXXXXX",
+          tiktokPixelId: "C1234567890123",
+        });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/pixel-preset"),
+          expect.objectContaining({ method: "POST" })
+        );
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.name).toBe("Test Preset");
+        expect(body.fbPixelId).toBe("1234567890");
+        expect(body.googleTagId).toBe("G-XXXXXXXXXX");
+        expect(body.tiktokPixelId).toBe("C1234567890123");
+        expect(body.isDefault).toBe(true);
+        expect(result).toEqual(mockPreset);
+      });
+
+      it("should create a preset with only one pixel", async () => {
+        const mockPreset = createMockPreset({
+          googleTagId: undefined,
+          tiktokPixelId: undefined,
+        });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockPreset),
+        });
+
+        await client.createPixelPreset({
+          name: "Facebook only",
+          fbPixelId: "1234567890",
+        });
+
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.name).toBe("Facebook only");
+        expect(body.fbPixelId).toBe("1234567890");
+        expect(body.googleTagId).toBeUndefined();
+      });
+    });
+
+    describe("updatePixelPreset", () => {
+      it("should update a preset", async () => {
+        const mockResponse = createMockPreset({ name: "Updated Preset" });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        await client.updatePixelPreset("pp-uuid-123", { name: "Updated Preset" });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/pixel-preset/pp-uuid-123"),
+          expect.objectContaining({ method: "PATCH" })
+        );
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.name).toBe("Updated Preset");
+      });
+
+      it("should update isDefault to true", async () => {
+        const mockResponse = createMockPreset({ isDefault: true });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        await client.updatePixelPreset("pp-uuid-123", { isDefault: true });
+
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.isDefault).toBe(true);
+      });
+    });
+
+    describe("deletePixelPreset", () => {
+      it("should delete a preset", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(undefined),
+        });
+
+        await client.deletePixelPreset("pp-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/manager/pixel-preset/pp-uuid-123"),
+          expect.objectContaining({ method: "DELETE" })
+        );
+      });
+
+      it("should handle 404 when deleting non-existent preset", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          json: () => Promise.resolve({ message: "Preset non trouvé" }),
+        });
+
+        await expect(client.deletePixelPreset("non-existent")).rejects.toThrow();
       });
     });
   });
