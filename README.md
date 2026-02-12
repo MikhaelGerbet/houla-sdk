@@ -14,7 +14,7 @@
 - **QR Codes included** - Generate QR codes for any link at no extra cost
 - **Analytics** - Track clicks, browsers, devices, countries, and referrers
 - **UTM tracking** - Built-in UTM parameter support for marketing campaigns
-- **Ephemeral links** - Create self-destructing links (1h to 48h)
+- **Ephemeral links** - Create self-destructing links (1h to 48h) or with a custom expiration date
 - **Custom keys** - Choose your own short URL keys
 - **Smart Routing** - Redirect visitors based on country, device, language, time, and more
 - **Webhooks** - Real-time HTTP notifications for 10 event types (including Link-in-Bio exclusives)
@@ -103,6 +103,7 @@ When no custom key is provided, the API auto-generates one:
 | `utm_content` | `string` | No | UTM content (for A/B testing) |
 | `isEphemeral` | `boolean` | No | Create a self-destructing link |
 | `ephemeralDuration` | `EphemeralDuration` | No | Duration: `"1h"`, `"6h"`, `"12h"`, `"24h"`, `"48h"` |
+| `customExpiresAt` | `string` | No | Custom expiration date (ISO 8601). Mutually exclusive with `ephemeralDuration`. Key is NOT recycled. |
 | `password` | `string` | No | Password to protect the link (1-100 chars). Hashed with bcrypt. Enhanced security included. |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
@@ -142,6 +143,13 @@ const link = await houla.createLink({
   ephemeralDuration: EphemeralDuration.HOURS_24,
 });
 // link.expiresAt contains the expiration date
+
+// Custom expiration date (link expires at a specific date, key NOT recycled)
+const link2 = await houla.createLink({
+  url: "https://example.com/event",
+  customExpiresAt: "2026-06-15T23:59:59.000Z",
+});
+// link2.expiresAt = "2026-06-15T23:59:59.000Z"
 
 // With UTM parameters for marketing
 const link = await houla.createLink({
@@ -420,6 +428,7 @@ export class LinkService {
 | **Custom keys** | FREE | Paid | Paid | Paid |
 | **API access** | FREE | Paid | Paid | Paid |
 | **Ephemeral links** | FREE | No | No | No |
+| **Custom expiration** | FREE | No | No | No |
 | **Smart Routing** | FREE | Enterprise only | No | Paid |
 | **A/B Testing** | FREE | Enterprise only | No | Paid |
 | **Password links** | FREE | Paid | No | Paid |

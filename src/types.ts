@@ -109,6 +109,8 @@ export interface CreateLinkDto {
   isEphemeral?: boolean;
   ephemeralDuration?: EphemeralDuration;
   createdByType?: LinkCreatedType;
+  /** Custom expiration date (ISO 8601). Mutually exclusive with ephemeralDuration. Key is NOT recycled. */
+  customExpiresAt?: string;
   /** Protect link with a password */
   isPasswordProtected?: boolean;
   /** Password for protected link */
@@ -128,6 +130,8 @@ export interface UpdateLinkDto {
   utm_content?: string;
   isEphemeral?: boolean;
   ephemeralDuration?: EphemeralDuration;
+  /** Custom expiration date (ISO 8601), or null to remove expiration */
+  customExpiresAt?: string | null;
 }
 
 export interface PaginatedResponse<T> {
