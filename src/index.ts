@@ -15,6 +15,8 @@ export {
   QRCodeFormat,
   QRCodeErrorCorrectionLevel,
   WebhookEvent,
+  CustomDomainStatus,
+  VerificationMethod,
 } from "./types";
 
 // Types - Interfaces
@@ -43,4 +45,6 @@ export type {
   WebhookLog,
   WebhookStats,
   TestWebhookResult,
+  CustomDomain,
+  CreateCustomDomainDto,
 } from "./types";

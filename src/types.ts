@@ -90,6 +90,8 @@ export interface Link {
   googleTagId?: string;
   /** TikTok Pixel ID for retargeting */
   tiktokPixelId?: string;
+  /** Custom domain ID (UUID) — links the short URL to a custom domain */
+  customDomainId?: string;
 }
 
 export interface QRCodeOptions {
@@ -127,6 +129,8 @@ export interface CreateLinkDto {
   googleTagId?: string;
   /** TikTok Pixel ID (CXXX...) for retargeting */
   tiktokPixelId?: string;
+  /** Custom domain ID (UUID) to use for this link's short URL */
+  customDomainId?: string;
 }
 
 export interface UpdateLinkDto {
@@ -150,6 +154,8 @@ export interface UpdateLinkDto {
   googleTagId?: string | null;
   /** TikTok Pixel ID, or null to remove */
   tiktokPixelId?: string | null;
+  /** Custom domain ID, or null to remove */
+  customDomainId?: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -383,5 +389,58 @@ export interface UpdatePixelPresetDto {
   googleTagId?: string | null;
   /** TikTok Pixel ID, or null to remove */
   tiktokPixelId?: string | null;
+}
+
+// ─── Custom Domains ───
+
+export enum CustomDomainStatus {
+  PENDING = "pending",
+  DNS_PENDING = "dns_pending",
+  DNS_VERIFIED = "dns_verified",
+  SSL_PENDING = "ssl_pending",
+  ACTIVE = "active",
+  FAILED = "failed",
+  SUSPENDED = "suspended",
+}
+
+export enum VerificationMethod {
+  CNAME = "cname",
+  TXT = "txt",
+}
+
+export interface CustomDomain {
+  /** UUID */
+  id: string;
+  /** The custom domain name (e.g. "go.example.com") */
+  domain: string;
+  /** Owner user ID */
+  ownerId: string;
+  /** Current domain status */
+  status: CustomDomainStatus;
+  /** Verification method (CNAME or TXT) */
+  verificationMethod: VerificationMethod;
+  /** Token for TXT record verification */
+  verificationToken?: string;
+  /** Whether DNS has been verified */
+  dnsVerified: boolean;
+  /** Date when DNS was verified */
+  dnsVerifiedAt?: string;
+  /** Whether SSL certificate is configured */
+  sslConfigured: boolean;
+  /** Date of last DNS check */
+  lastDnsCheckAt?: string;
+  /** Error message from last DNS check */
+  lastDnsCheckError?: string;
+  /** CNAME target for DNS configuration */
+  cnameTarget?: string;
+  /** TXT record name for verification */
+  txtRecordName?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCustomDomainDto {
+  /** The domain name to register (e.g. "go.example.com") */
+  domain: string;
 }
 

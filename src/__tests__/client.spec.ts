@@ -12,6 +12,9 @@ import {
   Webhook,
   WebhookWithSecret,
   PixelPreset,
+  CustomDomain,
+  CustomDomainStatus,
+  VerificationMethod,
 } from "../types";
 
 // Mock fetch globally
@@ -1754,6 +1757,229 @@ describe("HoulaClient", () => {
         });
 
         await expect(client.deletePixelPreset("non-existent")).rejects.toThrow();
+      });
+    });
+  });
+
+  // ==================== Custom Domains Tests ====================
+  describe("Custom Domains", () => {
+    const createMockDomain = (overrides: Partial<CustomDomain> = {}): CustomDomain => ({
+      id: "dom-uuid-123",
+      domain: "links.mysite.com",
+      status: CustomDomainStatus.PENDING,
+      verificationToken: "houla-verify-abc123def456",
+      verificationMethod: VerificationMethod.CNAME,
+      dnsVerified: false,
+      sslConfigured: false,
+      isActive: false,
+      cnameTarget: "custom.hou.la",
+      txtRecordName: "_houla-verify.links.mysite.com",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...overrides,
+    });
+
+    describe("listDomains", () => {
+      it("should list all domains", async () => {
+        const mockDomains = [createMockDomain(), createMockDomain({ id: "dom-uuid-456", domain: "go.example.com" })];
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomains),
+        });
+
+        const result = await client.listDomains();
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/domains"),
+          expect.any(Object)
+        );
+        expect(result).toHaveLength(2);
+      });
+
+      it("should return empty array when no domains", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([]),
+        });
+
+        const result = await client.listDomains();
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe("getDomain", () => {
+      it("should get a domain by id", async () => {
+        const mockDomain = createMockDomain();
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomain),
+        });
+
+        const result = await client.getDomain("dom-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/domains/dom-uuid-123"),
+          expect.any(Object)
+        );
+        expect(result.domain).toBe("links.mysite.com");
+      });
+
+      it("should handle 404 for non-existent domain", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          json: () => Promise.resolve({ message: "Domain not found" }),
+        });
+
+        await expect(client.getDomain("non-existent")).rejects.toThrow();
+      });
+    });
+
+    describe("createDomain", () => {
+      it("should create a domain", async () => {
+        const mockDomain = createMockDomain();
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomain),
+        });
+
+        const result = await client.createDomain({ domain: "links.mysite.com" });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/domains"),
+          expect.objectContaining({ method: "POST" })
+        );
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.domain).toBe("links.mysite.com");
+        expect(result.verificationToken).toBeDefined();
+        expect(result.cnameTarget).toBe("custom.hou.la");
+      });
+
+      it("should handle 403 for free plan users", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 403,
+          statusText: "Forbidden",
+          json: () => Promise.resolve({ message: "Custom domains require a Pro or Business plan" }),
+        });
+
+        await expect(client.createDomain({ domain: "links.mysite.com" })).rejects.toThrow();
+      });
+
+      it("should handle 409 for duplicate domain", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 409,
+          statusText: "Conflict",
+          json: () => Promise.resolve({ message: "Domain already exists" }),
+        });
+
+        await expect(client.createDomain({ domain: "links.mysite.com" })).rejects.toThrow();
+      });
+    });
+
+    describe("verifyDomain", () => {
+      it("should verify domain DNS", async () => {
+        const mockDomain = createMockDomain({
+          status: CustomDomainStatus.ACTIVE,
+          dnsVerified: true,
+          isActive: true,
+        });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomain),
+        });
+
+        const result = await client.verifyDomain("dom-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/domains/dom-uuid-123/verify"),
+          expect.objectContaining({ method: "POST" })
+        );
+        expect(result.status).toBe(CustomDomainStatus.ACTIVE);
+        expect(result.dnsVerified).toBe(true);
+      });
+
+      it("should return failed status if DNS not configured", async () => {
+        const mockDomain = createMockDomain({
+          status: CustomDomainStatus.FAILED,
+          dnsVerified: false,
+        });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomain),
+        });
+
+        const result = await client.verifyDomain("dom-uuid-123");
+        expect(result.status).toBe(CustomDomainStatus.FAILED);
+      });
+    });
+
+    describe("changeDomainVerificationMethod", () => {
+      it("should change to TXT method", async () => {
+        const mockDomain = createMockDomain({
+          verificationMethod: VerificationMethod.TXT,
+          dnsVerified: false,
+          status: CustomDomainStatus.PENDING,
+        });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomain),
+        });
+
+        const result = await client.changeDomainVerificationMethod("dom-uuid-123", VerificationMethod.TXT);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/domains/dom-uuid-123/verification-method"),
+          expect.objectContaining({ method: "PATCH" })
+        );
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.method).toBe("txt");
+        expect(result.verificationMethod).toBe(VerificationMethod.TXT);
+      });
+
+      it("should change to CNAME method", async () => {
+        const mockDomain = createMockDomain({
+          verificationMethod: VerificationMethod.CNAME,
+        });
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockDomain),
+        });
+
+        await client.changeDomainVerificationMethod("dom-uuid-123", VerificationMethod.CNAME);
+
+        const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+        expect(body.method).toBe("cname");
+      });
+    });
+
+    describe("deleteDomain", () => {
+      it("should delete a domain", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ success: true }),
+        });
+
+        const result = await client.deleteDomain("dom-uuid-123");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/domains/dom-uuid-123"),
+          expect.objectContaining({ method: "DELETE" })
+        );
+        expect(result.success).toBe(true);
+      });
+
+      it("should handle 404 when deleting non-existent domain", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          json: () => Promise.resolve({ message: "Domain not found" }),
+        });
+
+        await expect(client.deleteDomain("non-existent")).rejects.toThrow();
       });
     });
   });

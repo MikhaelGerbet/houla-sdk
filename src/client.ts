@@ -24,6 +24,9 @@ import {
   PixelPreset,
   CreatePixelPresetDto,
   UpdatePixelPresetDto,
+  CustomDomain,
+  CreateCustomDomainDto,
+  VerificationMethod,
 } from "./types";
 
 export class HoulaClient {
@@ -260,6 +263,42 @@ export class HoulaClient {
 
   async deletePixelPreset(id: string): Promise<void> {
     await this.request<void>(`/api/manager/pixel-preset/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // ─── Custom Domains ───
+
+  async listDomains(): Promise<CustomDomain[]> {
+    return this.request<CustomDomain[]>("/api/domains");
+  }
+
+  async getDomain(id: string): Promise<CustomDomain> {
+    return this.request<CustomDomain>(`/api/domains/${id}`);
+  }
+
+  async createDomain(data: CreateCustomDomainDto): Promise<CustomDomain> {
+    return this.request<CustomDomain>("/api/domains", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async verifyDomain(id: string): Promise<CustomDomain> {
+    return this.request<CustomDomain>(`/api/domains/${id}/verify`, {
+      method: "POST",
+    });
+  }
+
+  async changeDomainVerificationMethod(id: string, method: VerificationMethod): Promise<CustomDomain> {
+    return this.request<CustomDomain>(`/api/domains/${id}/verification-method`, {
+      method: "PATCH",
+      body: JSON.stringify({ method }),
+    });
+  }
+
+  async deleteDomain(id: string): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/api/domains/${id}`, {
       method: "DELETE",
     });
   }

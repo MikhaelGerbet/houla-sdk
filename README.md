@@ -440,6 +440,69 @@ if (defaultPreset) {
 }
 ```
 
+## Custom Domains
+
+Manage custom domains to white-label your short links (requires **Pro** or **Business** plan).
+
+```typescript
+// List your custom domains
+const domains = await houla.listDomains();
+
+// Add a new domain
+const domain = await houla.createDomain({ domain: "links.mysite.com" });
+console.log(domain.verificationToken); // Use to configure DNS
+console.log(domain.cnameTarget); // "custom.hou.la"
+console.log(domain.txtRecordName); // "_houla-verify.links.mysite.com"
+
+// Verify DNS configuration
+const verified = await houla.verifyDomain(domain.id);
+console.log(verified.status); // "active" if DNS is valid
+
+// Change verification method (CNAME ↔ TXT)
+await houla.changeDomainVerificationMethod(domain.id, "txt");
+
+// Get a specific domain
+const details = await houla.getDomain(domain.id);
+
+// Delete a domain
+await houla.deleteDomain(domain.id);
+```
+
+### Domain Create Options
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `domain` | `string` | **Yes** | Fully qualified domain name (4-253 chars, e.g. `links.mysite.com`) |
+
+### DNS Configuration
+
+After creating a domain, configure one of these DNS records at your registrar:
+
+- **CNAME** (recommended): Point `links.mysite.com` → `custom.hou.la`
+- **TXT**: Add `_houla-verify.links.mysite.com` with value `houla-verify-abc123...`
+
+### Domain Statuses
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Created, waiting for DNS configuration |
+| `dns_pending` | DNS verification in progress |
+| `dns_verified` | DNS verified, SSL pending |
+| `active` | Domain is active and usable for links |
+| `failed` | DNS verification failed |
+| `suspended` | Subscription expired or abuse |
+
+### Using Domains with Links
+
+```typescript
+// Create a link with a custom domain
+const link = await houla.createLink({
+  url: "https://example.com/landing",
+  customDomainId: domain.id,
+});
+// link.shortUrl → "https://links.mysite.com/xY7k9"
+```
+
 ## Framework Examples
 
 ### Next.js (App Router)
