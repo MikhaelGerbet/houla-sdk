@@ -444,3 +444,98 @@ export interface CreateCustomDomainDto {
   domain: string;
 }
 
+// ─── Bio Pages (Multi Link-in-Bio) ───
+
+/** Type of bio page */
+export enum BioPageType {
+  STANDARD = "standard",
+  SHOP = "shop",
+}
+
+/** Summary of a bio page (returned by list endpoint) */
+export interface BioPageSummary {
+  /** UUID */
+  id: string;
+  /** Slug for the page (null for default page) */
+  slug: string | null;
+  /** Display name shown on the page */
+  displayName: string;
+  /** Whether this is the default page (accessible via @username) */
+  isDefault: boolean;
+  /** Page type */
+  pageType: BioPageType;
+  /** Custom domain ID attached to this page */
+  customDomainId?: string | null;
+  /** Whether the page is publicly visible */
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Full bio page details */
+export interface BioPage extends BioPageSummary {
+  /** Username of the owner */
+  username: string;
+  /** Short bio text */
+  bio: string | null;
+  /** Avatar URL */
+  avatarUrl: string | null;
+  /** Banner URL */
+  bannerUrl: string | null;
+  /** Visual theme */
+  theme: string;
+  /** Primary color (hex or rgba) */
+  primaryColor: string | null;
+  /** Background color (hex, rgba or gradient) */
+  backgroundColor: string | null;
+  /** Background image URL */
+  backgroundImageUrl: string | null;
+  /** Background overlay opacity (0-100) */
+  backgroundOverlayOpacity: number | null;
+  /** Button color */
+  buttonColor: string | null;
+  /** Button text color */
+  buttonTextColor: string | null;
+  /** Button blur (0-30 px) */
+  buttonBlur: number | null;
+  /** Button opacity (0-100%) */
+  buttonOpacity: number | null;
+  /** Text color */
+  textColor: string | null;
+  /** Whether avatar is shown */
+  showAvatar: boolean;
+}
+
+export interface CreateBioPageDto {
+  /** Display name for the page */
+  displayName: string;
+  /** Slug (lowercase, a-z0-9_-). Auto-generated if omitted. */
+  slug?: string;
+  /** Short bio text (max 160 chars) */
+  bio?: string;
+  /** Page type */
+  pageType?: BioPageType;
+  /** Custom domain ID (UUID) to attach */
+  customDomainId?: string;
+  /** Design preset ID (UUID) to apply */
+  presetId?: string;
+}
+
+export interface UpdateBioPageDto {
+  /** Slug (lowercase, a-z0-9_-) */
+  slug?: string;
+  /** Display name */
+  displayName?: string;
+  /** Short bio text (max 160 chars) */
+  bio?: string;
+  /** Page type */
+  pageType?: BioPageType;
+  /** Custom domain ID (UUID), or null to detach */
+  customDomainId?: string | null;
+}
+
+export interface AttachCustomDomainToBioPageDto {
+  /** Custom domain ID (UUID), or null to detach */
+  customDomainId?: string | null;
+}
+

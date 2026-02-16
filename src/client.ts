@@ -27,6 +27,11 @@ import {
   CustomDomain,
   CreateCustomDomainDto,
   VerificationMethod,
+  BioPageSummary,
+  BioPage,
+  CreateBioPageDto,
+  UpdateBioPageDto,
+  AttachCustomDomainToBioPageDto,
 } from "./types";
 
 export class HoulaClient {
@@ -300,6 +305,49 @@ export class HoulaClient {
   async deleteDomain(id: string): Promise<{ success: boolean }> {
     return this.request<{ success: boolean }>(`/api/domains/${id}`, {
       method: "DELETE",
+    });
+  }
+
+  // ─── Bio Pages (Multi Link-in-Bio) ───
+
+  async listBioPages(): Promise<BioPageSummary[]> {
+    return this.request<BioPageSummary[]>("/api/manager/profile/bio-pages");
+  }
+
+  async getBioPage(id: string): Promise<BioPage> {
+    return this.request<BioPage>(`/api/manager/profile/bio-pages/${id}`);
+  }
+
+  async createBioPage(data: CreateBioPageDto): Promise<BioPage> {
+    return this.request<BioPage>("/api/manager/profile/bio-pages", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateBioPage(id: string, data: UpdateBioPageDto): Promise<BioPage> {
+    return this.request<BioPage>(`/api/manager/profile/bio-pages/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBioPage(id: string): Promise<void> {
+    await this.request<void>(`/api/manager/profile/bio-pages/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  async setBioPageAsDefault(id: string): Promise<BioPage> {
+    return this.request<BioPage>(`/api/manager/profile/bio-pages/${id}/set-default`, {
+      method: "PATCH",
+    });
+  }
+
+  async attachCustomDomainToBioPage(id: string, data: AttachCustomDomainToBioPageDto): Promise<BioPage> {
+    return this.request<BioPage>(`/api/manager/profile/bio-pages/${id}/custom-domain`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
     });
   }
 }

@@ -17,6 +17,7 @@ export {
   WebhookEvent,
   CustomDomainStatus,
   VerificationMethod,
+  BioPageType,
 } from "./types";
 
 // Types - Interfaces
@@ -47,4 +48,9 @@ export type {
   TestWebhookResult,
   CustomDomain,
   CreateCustomDomainDto,
+  BioPageSummary,
+  BioPage,
+  CreateBioPageDto,
+  UpdateBioPageDto,
+  AttachCustomDomainToBioPageDto,
 } from "./types";
