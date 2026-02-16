@@ -6,6 +6,7 @@ import {
   PaginatedResponse,
   CheckAvailabilityResponse,
   DeleteLinkResponse,
+  OgImageUploadResponse,
   QRCodeOptions,
   QRCodePngResponse,
   QRCodeSvgResponse,
@@ -111,6 +112,54 @@ export class HoulaClient {
 
   async deleteLink(id: string): Promise<DeleteLinkResponse> {
     return this.request<DeleteLinkResponse>(`/api/link/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // ─── OG Image Upload ───
+
+  /**
+   * Upload a custom OG image for a link.
+   * The image is auto-resized to 1200×630 (optimal for Facebook/LinkedIn) and converted to WebP.
+   * @param linkId - UUID of the link
+   * @param file - Image file (Blob/File). Accepted formats: JPEG, PNG, WebP, GIF. Max 8 MB.
+   * @returns The public URL and R2 key of the uploaded image
+   */
+  async uploadOgImage(linkId: string, file: Blob, filename = "og-image"): Promise<OgImageUploadResponse> {
+    const formData = new FormData();
+    formData.append("file", file, filename);
+
+    const url = `${this.config.apiUrl}/api/manager/link/${linkId}/og-image`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "X-API-Key": this.config.apiKey,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      return response.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Delete the uploaded OG image for a link.
+   * @param linkId - UUID of the link
+   */
+  async deleteOgImage(linkId: string): Promise<void> {
+    await this.request<void>(`/api/manager/link/${linkId}/og-image`, {
       method: "DELETE",
     });
   }

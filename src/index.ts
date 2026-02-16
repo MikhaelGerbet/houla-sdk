@@ -32,6 +32,7 @@ export type {
   QRCodeSvgResponse,
   CheckAvailabilityResponse,
   DeleteLinkResponse,
+  OgImageUploadResponse,
   LinkRule,
   LinkRuleCondition,
   CreateLinkRuleDto,

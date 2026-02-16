@@ -92,6 +92,17 @@ export interface Link {
   tiktokPixelId?: string;
   /** Custom domain ID (UUID) — links the short URL to a custom domain */
   customDomainId?: string;
+
+  /** Open Graph title for social link previews */
+  ogTitle?: string;
+  /** Open Graph description for social link previews */
+  ogDescription?: string;
+  /** Open Graph image URL for social link previews */
+  ogImageUrl?: string;
+  /** Timestamp of last OG crawl */
+  ogCrawledAt?: string;
+  /** OG crawl status: pending, success, failed, manual */
+  ogCrawlStatus?: string;
 }
 
 export interface QRCodeOptions {
@@ -131,6 +142,12 @@ export interface CreateLinkDto {
   tiktokPixelId?: string;
   /** Custom domain ID (UUID) to use for this link's short URL */
   customDomainId?: string;
+  /** Custom OG title for social link previews (max 200 chars) */
+  ogTitle?: string;
+  /** Custom OG description for social link previews (max 500 chars) */
+  ogDescription?: string;
+  /** Custom OG image URL for social link previews (max 2048 chars) */
+  ogImageUrl?: string;
 }
 
 export interface UpdateLinkDto {
@@ -156,6 +173,12 @@ export interface UpdateLinkDto {
   tiktokPixelId?: string | null;
   /** Custom domain ID, or null to remove */
   customDomainId?: string | null;
+  /** Custom OG title, or null to remove */
+  ogTitle?: string | null;
+  /** Custom OG description, or null to remove */
+  ogDescription?: string | null;
+  /** Custom OG image URL, or null to remove */
+  ogImageUrl?: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -185,6 +208,13 @@ export interface DeleteLinkResponse {
   deletedAt?: string;
   keyReleased?: boolean;
   archivedKey?: string;
+}
+
+export interface OgImageUploadResponse {
+  /** Public URL of the uploaded OG image (Cloudflare R2) */
+  ogImageUrl: string;
+  /** R2 storage key (internal) */
+  ogImageR2Key: string;
 }
 
 // ─── Smart Routing (Link Rules) ───
