@@ -108,6 +108,9 @@ When no custom key is provided, the API auto-generates one:
 | `fbPixelId` | `string` | No | Facebook/Meta Pixel ID (10-20 digits). Fires via intermediate page for humans. |
 | `googleTagId` | `string` | No | Google Tag ID (format: `G-XXX`, `AW-XXX`, `DC-XXX`, `UA-XXX`). Fires via gtag.js. |
 | `tiktokPixelId` | `string` | No | TikTok Pixel ID (format: `CXXX...`). Fires via intermediate page. |
+| `ogTitle` | `string` | No | Custom Open Graph title for social previews (max 200 chars) |
+| `ogDescription` | `string` | No | Custom Open Graph description for social previews (max 500 chars) |
+| `ogImageUrl` | `string` | No | Custom Open Graph image URL for social previews (max 2048 chars) |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
@@ -185,7 +188,65 @@ const trackedLink = await houla.createLink({
 });
 // Human visitors see a brief intermediate page (~800ms) where pixels fire,
 // then get redirected. Bots/crawlers receive a direct 301 redirect.
+
+// Link with custom OG Social Previews
+const ogLink = await houla.createLink({
+  url: "https://example.com/landing",
+  ogTitle: "My Custom Title",
+  ogDescription: "A short description shown on social media.",
+  ogImageUrl: "https://example.com/og-image.jpg",
+});
+// Social bots (Facebook, Twitter, LinkedIn, WhatsApp...) see these meta OG tags.
+// Human visitors are redirected normally.
 ```
+
+## OG Social Previews
+
+Customize the preview displayed when a short link is shared on social networks (Facebook, Twitter/X, LinkedIn, WhatsApp, Telegram, Discord, etc.). The meta Open Graph tags (`og:title`, `og:description`, `og:image`) are served to social bots that crawl your link.
+
+### Auto-detection
+
+When no OG fields are provided at link creation, the system automatically crawls the destination URL to extract existing meta tags (`og:title`, `og:description`, `og:image` with fallbacks on `twitter:title`, `meta description`, etc.).
+
+### Manual OG fields
+
+Pass `ogTitle`, `ogDescription`, and/or `ogImageUrl` in `createLink()` or `updateLink()` to override auto-detected values.
+
+```typescript
+// Create a link with custom OG
+const link = await houla.createLink({
+  url: "https://example.com/article",
+  ogTitle: "My Custom Title",
+  ogDescription: "Custom description for social sharing.",
+  ogImageUrl: "https://example.com/custom-og.jpg",
+});
+
+// Update OG fields
+await houla.updateLink(link.id, {
+  ogTitle: "Updated Title",
+  ogDescription: null, // remove description
+});
+```
+
+### OG Image Upload
+
+Upload a custom OG image. The image is auto-resized to 1200×630 (optimal for Facebook/LinkedIn), converted to WebP (quality 85%), and stored on Cloudflare R2.
+
+```typescript
+// Upload an OG image from a File/Blob
+const file = new File([buffer], "og-image.jpg", { type: "image/jpeg" });
+const result = await houla.uploadOgImage(link.id, file);
+console.log(result.ogImageUrl); // Public R2 URL
+
+// Delete the uploaded OG image
+await houla.deleteOgImage(link.id);
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `file` | `Blob/File` | Image file (JPEG, PNG, WebP, GIF). Max **8 MB**. |
+
+> **Social bots:** When a social bot (facebookexternalhit, Twitterbot, LinkedInBot, WhatsApp, Telegram, Discord, etc.) accesses a short link, it receives an HTML page with the OG meta tags instead of a 301 redirect. Human visitors are always redirected normally.
 
 ## Other Methods
 
@@ -572,6 +633,7 @@ export class LinkService {
 | **Webhooks** | FREE (10 events) | Enterprise only | No | Paid |
 | **Retargeting Pixels** | FREE | Paid | No | Paid |
 | **Pixel Presets** | FREE | No | No | No |
+| **OG Social Previews** | FREE | Enterprise only | No | No |
 
 ## Get Your FREE API Key
 

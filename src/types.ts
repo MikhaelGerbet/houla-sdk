@@ -486,11 +486,13 @@ export enum BioPageType {
 export interface BioPageSummary {
   /** UUID */
   id: string;
-  /** Slug for the page (null for default page) */
+  /** Username for this page's URL (@username) */
+  username: string;
+  /** Slug for legacy sub-pages (null for standard pages) */
   slug: string | null;
   /** Display name shown on the page */
   displayName: string;
-  /** Whether this is the default page (accessible via @username) */
+  /** Whether this is the default page */
   isDefault: boolean;
   /** Page type */
   pageType: BioPageType;
@@ -537,10 +539,10 @@ export interface BioPage extends BioPageSummary {
 }
 
 export interface CreateBioPageDto {
+  /** Username for the page URL (3-30 chars, a-zA-Z0-9_-) */
+  username: string;
   /** Display name for the page */
   displayName: string;
-  /** Slug (lowercase, a-z0-9_-). Auto-generated if omitted. */
-  slug?: string;
   /** Short bio text (max 160 chars) */
   bio?: string;
   /** Page type */
@@ -552,8 +554,6 @@ export interface CreateBioPageDto {
 }
 
 export interface UpdateBioPageDto {
-  /** Slug (lowercase, a-z0-9_-) */
-  slug?: string;
   /** Display name */
   displayName?: string;
   /** Short bio text (max 160 chars) */
