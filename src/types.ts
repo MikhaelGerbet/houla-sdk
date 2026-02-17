@@ -92,6 +92,8 @@ export interface Link {
   tiktokPixelId?: string;
   /** Custom domain ID (UUID) — links the short URL to a custom domain */
   customDomainId?: string;
+  /** Maximum number of clicks before the link expires (null = unlimited) */
+  maxHits?: number;
 
   /** Open Graph title for social link previews */
   ogTitle?: string;
@@ -142,6 +144,8 @@ export interface CreateLinkDto {
   tiktokPixelId?: string;
   /** Custom domain ID (UUID) to use for this link's short URL */
   customDomainId?: string;
+  /** Maximum number of clicks allowed (1 - 1,000,000). Link expires when reached. */
+  maxHits?: number;
   /** Custom OG title for social link previews (max 200 chars) */
   ogTitle?: string;
   /** Custom OG description for social link previews (max 500 chars) */
@@ -173,6 +177,8 @@ export interface UpdateLinkDto {
   tiktokPixelId?: string | null;
   /** Custom domain ID, or null to remove */
   customDomainId?: string | null;
+  /** Maximum number of clicks, or null to remove the limit */
+  maxHits?: number | null;
   /** Custom OG title, or null to remove */
   ogTitle?: string | null;
   /** Custom OG description, or null to remove */

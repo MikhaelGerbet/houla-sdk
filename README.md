@@ -111,6 +111,7 @@ When no custom key is provided, the API auto-generates one:
 | `ogTitle` | `string` | No | Custom Open Graph title for social previews (max 200 chars) |
 | `ogDescription` | `string` | No | Custom Open Graph description for social previews (max 500 chars) |
 | `ogImageUrl` | `string` | No | Custom Open Graph image URL for social previews (max 2048 chars) |
+| `maxHits` | `number` | No | Maximum number of allowed clicks (1 to 1,000,000). Link expires automatically when reached. |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
@@ -563,6 +564,26 @@ const link = await houla.createLink({
 });
 // link.shortUrl → "https://links.mysite.com/xY7k9"
 ```
+
+## Click Limit
+
+Set a maximum number of clicks on a link. The link automatically expires when the limit is reached.
+
+```typescript
+// Create a link with a click limit
+const link = await houla.createLink({
+  url: "https://example.com/flash-sale",
+  maxHits: 500,
+});
+
+// Update the click limit
+await houla.updateLink(link.id, { maxHits: 1000 });
+
+// Remove the click limit
+await houla.updateLink(link.id, { maxHits: null });
+```
+
+The `maxHits` field accepts a value between 1 and 1,000,000. When `hitsCount >= maxHits`, the link stops redirecting and displays an expiration page. This is compatible with scheduled expiration (`customExpiresAt`) - whichever condition is met first deactivates the link.
 
 ## Framework Examples
 
