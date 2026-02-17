@@ -1983,4 +1983,321 @@ describe("HoulaClient", () => {
       });
     });
   });
+
+  // ==================== Workspaces ====================
+  describe("Workspaces", () => {
+    const mockWorkspace = {
+      id: "ws-uuid-001",
+      name: "Mon Agence",
+      slug: "mon-agence",
+      type: "team",
+      ownerId: "user-uuid-001",
+      plan: "free",
+      maxMembers: 5,
+      maxLinks: null,
+      maxCustomDomains: 0,
+      maxApiKeys: 3,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const mockMember = {
+      id: "member-uuid-001",
+      workspaceId: "ws-uuid-001",
+      userId: "user-uuid-001",
+      role: "owner",
+      joinedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+
+    const mockInvite = {
+      id: "invite-uuid-001",
+      workspaceId: "ws-uuid-001",
+      email: "invited@test.com",
+      role: "member",
+      token: "invite-token-001",
+      expiresAt: new Date(Date.now() + 86400000).toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+
+    describe("setWorkspaceId", () => {
+      it("should set workspace ID and include it in subsequent requests", async () => {
+        client.setWorkspaceId("ws-uuid-001");
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: [], total: 0, page: 1, pageCount: 0, count: 0 }),
+        });
+
+        await client.getLinks();
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              "X-Workspace-Id": "ws-uuid-001",
+            }),
+          }),
+        );
+      });
+
+      it("should not include X-Workspace-Id when cleared", async () => {
+        client.setWorkspaceId("ws-uuid-001");
+        client.setWorkspaceId(undefined);
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: [], total: 0, page: 1, pageCount: 0, count: 0 }),
+        });
+
+        await client.getLinks();
+
+        const callHeaders = mockFetch.mock.calls[0][1].headers;
+        expect(callHeaders["X-Workspace-Id"]).toBeUndefined();
+      });
+    });
+
+    describe("listWorkspaces", () => {
+      it("should list all workspaces", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([mockWorkspace]),
+        });
+
+        const result = await client.listWorkspaces();
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces"),
+          expect.objectContaining({ method: undefined }),
+        );
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe("Mon Agence");
+      });
+    });
+
+    describe("getWorkspace", () => {
+      it("should get workspace by ID", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockWorkspace),
+        });
+
+        const result = await client.getWorkspace("ws-uuid-001");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/ws-uuid-001"),
+          expect.any(Object),
+        );
+        expect(result.id).toBe("ws-uuid-001");
+      });
+    });
+
+    describe("createWorkspace", () => {
+      it("should create a team workspace", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockWorkspace),
+        });
+
+        const result = await client.createWorkspace({
+          name: "Mon Agence",
+          description: "Test workspace",
+        });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces"),
+          expect.objectContaining({
+            method: "POST",
+            body: JSON.stringify({ name: "Mon Agence", description: "Test workspace" }),
+          }),
+        );
+        expect(result.name).toBe("Mon Agence");
+      });
+    });
+
+    describe("updateWorkspace", () => {
+      it("should update workspace", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ ...mockWorkspace, name: "Updated" }),
+        });
+
+        const result = await client.updateWorkspace("ws-uuid-001", { name: "Updated" });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/ws-uuid-001"),
+          expect.objectContaining({
+            method: "PATCH",
+            body: JSON.stringify({ name: "Updated" }),
+          }),
+        );
+        expect(result.name).toBe("Updated");
+      });
+    });
+
+    describe("deleteWorkspace", () => {
+      it("should delete workspace", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(undefined),
+        });
+
+        await client.deleteWorkspace("ws-uuid-001");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/ws-uuid-001"),
+          expect.objectContaining({ method: "DELETE" }),
+        );
+      });
+    });
+
+    describe("listWorkspaceMembers", () => {
+      it("should list members", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([mockMember]),
+        });
+
+        const result = await client.listWorkspaceMembers("ws-uuid-001");
+
+        expect(result).toHaveLength(1);
+        expect(result[0].role).toBe("owner");
+      });
+    });
+
+    describe("updateMemberRole", () => {
+      it("should update member role", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ ...mockMember, role: "viewer" }),
+        });
+
+        const result = await client.updateMemberRole("ws-uuid-001", "member-uuid-001", {
+          role: "viewer" as any,
+        });
+
+        expect(result.role).toBe("viewer");
+      });
+    });
+
+    describe("removeMember", () => {
+      it("should remove member", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(undefined),
+        });
+
+        await client.removeMember("ws-uuid-001", "member-uuid-001");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/ws-uuid-001/members/member-uuid-001"),
+          expect.objectContaining({ method: "DELETE" }),
+        );
+      });
+    });
+
+    describe("transferOwnership", () => {
+      it("should transfer ownership", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockWorkspace),
+        });
+
+        await client.transferOwnership("ws-uuid-001", { newOwnerId: "user-uuid-002" });
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/ws-uuid-001/transfer"),
+          expect.objectContaining({
+            method: "POST",
+            body: JSON.stringify({ newOwnerId: "user-uuid-002" }),
+          }),
+        );
+      });
+    });
+
+    describe("inviteMember", () => {
+      it("should invite a member by email", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockInvite),
+        });
+
+        const result = await client.inviteMember("ws-uuid-001", {
+          email: "invited@test.com",
+          role: "member" as any,
+        });
+
+        expect(result.email).toBe("invited@test.com");
+        expect(result.role).toBe("member");
+      });
+    });
+
+    describe("listInvites", () => {
+      it("should list pending invites", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve([mockInvite]),
+        });
+
+        const result = await client.listInvites("ws-uuid-001");
+
+        expect(result).toHaveLength(1);
+      });
+    });
+
+    describe("cancelInvite", () => {
+      it("should cancel an invite", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(undefined),
+        });
+
+        await client.cancelInvite("ws-uuid-001", "invite-uuid-001");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/ws-uuid-001/invites/invite-uuid-001"),
+          expect.objectContaining({ method: "DELETE" }),
+        );
+      });
+    });
+
+    describe("acceptInvite", () => {
+      it("should accept an invite by token", async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockMember),
+        });
+
+        const result = await client.acceptInvite("invite-token-001");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/workspaces/invites/invite-token-001/accept"),
+          expect.objectContaining({ method: "POST" }),
+        );
+        expect(result.workspaceId).toBe("ws-uuid-001");
+      });
+    });
+
+    describe("error handling", () => {
+      it("should throw on 403 (not member)", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 403,
+          statusText: "Forbidden",
+          json: () => Promise.resolve({ message: "Vous n'etes pas membre de ce workspace" }),
+        });
+
+        await expect(client.getWorkspace("ws-uuid-001")).rejects.toThrow();
+      });
+
+      it("should throw on 404 (workspace not found)", async () => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          json: () => Promise.resolve({ message: "Workspace non trouve" }),
+        });
+
+        await expect(client.getWorkspace("non-existent")).rejects.toThrow();
+      });
+    });
+  });
 });

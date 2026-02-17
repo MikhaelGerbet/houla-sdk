@@ -94,6 +94,8 @@ export interface Link {
   customDomainId?: string;
   /** Maximum number of clicks before the link expires (null = unlimited) */
   maxHits?: number;
+  /** Tags associated with this link */
+  tags?: Tag[];
 
   /** Open Graph title for social link previews */
   ogTitle?: string;
@@ -152,6 +154,8 @@ export interface CreateLinkDto {
   ogDescription?: string;
   /** Custom OG image URL for social link previews (max 2048 chars) */
   ogImageUrl?: string;
+  /** Array of tag IDs (UUIDs) to associate with this link */
+  tagIds?: string[];
 }
 
 export interface UpdateLinkDto {
@@ -185,6 +189,8 @@ export interface UpdateLinkDto {
   ogDescription?: string | null;
   /** Custom OG image URL, or null to remove */
   ogImageUrl?: string | null;
+  /** Array of tag IDs (UUIDs) to associate, or empty array to remove all tags */
+  tagIds?: string[];
 }
 
 export interface PaginatedResponse<T> {
@@ -221,6 +227,37 @@ export interface OgImageUploadResponse {
   ogImageUrl: string;
   /** R2 storage key (internal) */
   ogImageR2Key: string;
+}
+
+// ─── Smart Routing (Link Rules) ───
+
+// ─── Tags ───
+
+export interface Tag {
+  /** Unique tag identifier (UUID) */
+  id: string;
+  /** Tag display name (1-50 characters) */
+  name: string;
+  /** Tag color in hex format (#RRGGBB) */
+  color?: string;
+  /** Creation date (ISO 8601) */
+  createdAt: string;
+  /** Last update date (ISO 8601) */
+  updatedAt?: string;
+}
+
+export interface CreateTagDto {
+  /** Tag name (1-50 characters, required) */
+  name: string;
+  /** Tag color in hex format (#RRGGBB, optional) */
+  color?: string;
+}
+
+export interface UpdateTagDto {
+  /** Tag name (1-50 characters) */
+  name?: string;
+  /** Tag color in hex format (#RRGGBB) */
+  color?: string;
 }
 
 // ─── Smart Routing (Link Rules) ───
