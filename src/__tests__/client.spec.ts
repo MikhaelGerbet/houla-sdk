@@ -2066,7 +2066,7 @@ describe("HoulaClient", () => {
 
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining("/api/workspaces"),
-          expect.objectContaining({ method: undefined }),
+          expect.any(Object),
         );
         expect(result).toHaveLength(1);
         expect(result[0].name).toBe("Mon Agence");

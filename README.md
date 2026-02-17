@@ -112,6 +112,7 @@ When no custom key is provided, the API auto-generates one:
 | `ogDescription` | `string` | No | Custom Open Graph description for social previews (max 500 chars) |
 | `ogImageUrl` | `string` | No | Custom Open Graph image URL for social previews (max 2048 chars) |
 | `maxHits` | `number` | No | Maximum number of allowed clicks (1 to 1,000,000). Link expires automatically when reached. |
+| `tagIds` | `string[]` | No | Array of tag UUIDs to associate with the link. Tags must exist beforehand. |
 
 ### QR Code Options (for `getQRCode`, `getQRCodePng`, `getQRCodeSvg`)
 
@@ -584,6 +585,50 @@ await houla.updateLink(link.id, { maxHits: null });
 ```
 
 The `maxHits` field accepts a value between 1 and 1,000,000. When `hitsCount >= maxHits`, the link stops redirecting and displays an expiration page. This is compatible with scheduled expiration (`customExpiresAt`) - whichever condition is met first deactivates the link.
+
+## Tags
+
+Organize links with colored tags. Tags are managed per workspace.
+
+```typescript
+// Create a tag
+const tag = await houla.createTag({ name: "Marketing", color: "#667eea" });
+
+// List all tags
+const tags = await houla.listTags();
+
+// Create a link with tags
+const link = await houla.createLink({
+  url: "https://example.com/campaign",
+  tagIds: [tag.id],
+});
+
+// Update link tags
+await houla.updateLink(link.id, { tagIds: [tag.id, otherTag.id] });
+
+// Remove all tags from a link
+await houla.updateLink(link.id, { tagIds: null });
+
+// Delete a tag
+await houla.deleteTag(tag.id);
+```
+
+### Tag Create/Update Options
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | `string` | Yes | Tag name (1-50 characters) |
+| `color` | `string` | No | Hex color code (`#RRGGBB`), defaults to `#667eea` |
+
+### Tag Response
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Tag UUID |
+| `name` | `string` | Tag name |
+| `color` | `string` | Hex color code |
+| `createdAt` | `string` | ISO 8601 creation date |
+| `updatedAt` | `string` | ISO 8601 last update date |
 
 ## Framework Examples
 
