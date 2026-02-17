@@ -94,6 +94,8 @@ export interface Link {
   customDomainId?: string;
   /** Maximum number of clicks before the link expires (null = unlimited) */
   maxHits?: number;
+  /** Whether destination URL is hidden via iframe cloaking */
+  isCloaked?: boolean;
   /** Tags associated with this link */
   tags?: Tag[];
 
@@ -107,6 +109,13 @@ export interface Link {
   ogCrawledAt?: string;
   /** OG crawl status: pending, success, failed, manual */
   ogCrawlStatus?: string;
+
+  /** iOS deep link URI scheme or Universal Link (max 2048 chars) */
+  deepLinkIos?: string;
+  /** Android deep link URI scheme or Intent URL (max 2048 chars) */
+  deepLinkAndroid?: string;
+  /** Fallback URL (App Store / Play Store) when app is not installed (max 2048 chars) */
+  deepLinkFallbackUrl?: string;
 }
 
 export interface QRCodeOptions {
@@ -148,6 +157,8 @@ export interface CreateLinkDto {
   customDomainId?: string;
   /** Maximum number of clicks allowed (1 - 1,000,000). Link expires when reached. */
   maxHits?: number;
+  /** Enable Link Cloaking to hide the destination URL in the browser address bar */
+  isCloaked?: boolean;
   /** Custom OG title for social link previews (max 200 chars) */
   ogTitle?: string;
   /** Custom OG description for social link previews (max 500 chars) */
@@ -156,6 +167,12 @@ export interface CreateLinkDto {
   ogImageUrl?: string;
   /** Array of tag IDs (UUIDs) to associate with this link */
   tagIds?: string[];
+  /** iOS deep link URI scheme or Universal Link (max 2048 chars) */
+  deepLinkIos?: string;
+  /** Android deep link URI scheme or Intent URL (max 2048 chars) */
+  deepLinkAndroid?: string;
+  /** Fallback URL (App Store / Play Store) when app is not installed (max 2048 chars) */
+  deepLinkFallbackUrl?: string;
 }
 
 export interface UpdateLinkDto {
@@ -183,6 +200,8 @@ export interface UpdateLinkDto {
   customDomainId?: string | null;
   /** Maximum number of clicks, or null to remove the limit */
   maxHits?: number | null;
+  /** Enable or disable Link Cloaking (true/false) */
+  isCloaked?: boolean;
   /** Custom OG title, or null to remove */
   ogTitle?: string | null;
   /** Custom OG description, or null to remove */
@@ -191,6 +210,12 @@ export interface UpdateLinkDto {
   ogImageUrl?: string | null;
   /** Array of tag IDs (UUIDs) to associate, or empty array to remove all tags */
   tagIds?: string[];
+  /** iOS deep link URI scheme or Universal Link, or null to remove */
+  deepLinkIos?: string | null;
+  /** Android deep link URI scheme or Intent URL, or null to remove */
+  deepLinkAndroid?: string | null;
+  /** Fallback URL (App Store / Play Store), or null to remove */
+  deepLinkFallbackUrl?: string | null;
 }
 
 export interface PaginatedResponse<T> {
