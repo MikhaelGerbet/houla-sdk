@@ -18,6 +18,9 @@ export {
   CustomDomainStatus,
   VerificationMethod,
   BioPageType,
+  WorkspaceType,
+  WorkspacePlan,
+  WorkspaceRole,
 } from "./types";
 
 // Types - Interfaces
@@ -54,4 +57,12 @@ export type {
   CreateBioPageDto,
   UpdateBioPageDto,
   AttachCustomDomainToBioPageDto,
+  Workspace,
+  WorkspaceMember,
+  WorkspaceInvite,
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+  InviteMemberDto,
+  UpdateMemberRoleDto,
+  TransferOwnershipDto,
 } from "./types";

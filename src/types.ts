@@ -575,3 +575,114 @@ export interface AttachCustomDomainToBioPageDto {
   customDomainId?: string | null;
 }
 
+// ─── Workspaces ───
+
+/** Workspace type */
+export enum WorkspaceType {
+  PERSONAL = "personal",
+  TEAM = "team",
+}
+
+/** Workspace plan */
+export enum WorkspacePlan {
+  FREE = "free",
+  PRO = "pro",
+  BUSINESS = "business",
+  ENTERPRISE = "enterprise",
+}
+
+/** Workspace member role */
+export enum WorkspaceRole {
+  OWNER = "owner",
+  MEMBER = "member",
+  VIEWER = "viewer",
+}
+
+/** Workspace summary (returned by list endpoint) */
+export interface Workspace {
+  /** UUID */
+  id: string;
+  /** Display name */
+  name: string;
+  /** URL-friendly slug */
+  slug: string;
+  /** personal or team */
+  type: WorkspaceType;
+  /** Optional description */
+  description?: string;
+  /** Avatar URL */
+  avatarUrl?: string;
+  /** Owner user ID */
+  ownerId: string;
+  /** Subscription plan */
+  plan: WorkspacePlan;
+  /** Max team members */
+  maxMembers: number;
+  /** Max links (null = unlimited) */
+  maxLinks?: number;
+  /** Max custom domains */
+  maxCustomDomains: number;
+  /** Max API keys */
+  maxApiKeys: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Workspace member */
+export interface WorkspaceMember {
+  /** UUID */
+  id: string;
+  /** Workspace ID */
+  workspaceId: string;
+  /** User ID */
+  userId: string;
+  /** Member role */
+  role: WorkspaceRole;
+  /** When the member joined */
+  joinedAt?: string;
+  createdAt: string;
+}
+
+/** Workspace invitation */
+export interface WorkspaceInvite {
+  id: string;
+  email: string;
+  role: WorkspaceRole;
+  /** Invitation token */
+  token: string;
+  /** When the invite expires */
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface CreateWorkspaceDto {
+  /** Workspace name (1-100 chars) */
+  name: string;
+  /** Optional description (max 500 chars) */
+  description?: string;
+}
+
+export interface UpdateWorkspaceDto {
+  /** Workspace name (1-100 chars) */
+  name?: string;
+  /** Description (max 500 chars) */
+  description?: string;
+}
+
+export interface InviteMemberDto {
+  /** Email to invite */
+  email: string;
+  /** Role to assign (member or viewer, default: member) */
+  role?: WorkspaceRole.MEMBER | WorkspaceRole.VIEWER;
+}
+
+export interface UpdateMemberRoleDto {
+  /** New role (member or viewer) */
+  role: WorkspaceRole.MEMBER | WorkspaceRole.VIEWER;
+}
+
+export interface TransferOwnershipDto {
+  /** UUID of the new owner */
+  newOwnerId: string;
+}
+

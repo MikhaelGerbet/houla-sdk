@@ -2,6 +2,8 @@ export interface HoulaConfig {
   apiKey: string;
   apiUrl?: string;
   timeout?: number;
+  /** Default workspace ID. All requests will include X-Workspace-Id header when set. */
+  workspaceId?: string;
 }
 
 export const DEFAULT_CONFIG: Partial<HoulaConfig> = {
@@ -9,7 +11,7 @@ export const DEFAULT_CONFIG: Partial<HoulaConfig> = {
   timeout: 30000,
 };
 
-export function createConfig(config: HoulaConfig): Required<HoulaConfig> {
+export function createConfig(config: HoulaConfig): Required<Omit<HoulaConfig, "workspaceId">> & { workspaceId?: string } {
   if (!config.apiKey) {
     throw new Error("Hou.la SDK: apiKey is required. Get one at https://hou.la/admin/settings/api-keys");
   }
@@ -22,5 +24,6 @@ export function createConfig(config: HoulaConfig): Required<HoulaConfig> {
     apiKey: config.apiKey,
     apiUrl: config.apiUrl || DEFAULT_CONFIG.apiUrl!,
     timeout: config.timeout || DEFAULT_CONFIG.timeout!,
+    workspaceId: config.workspaceId,
   };
 }

@@ -33,13 +33,29 @@ import {
   CreateBioPageDto,
   UpdateBioPageDto,
   AttachCustomDomainToBioPageDto,
+  Workspace,
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+  WorkspaceMember,
+  WorkspaceInvite,
+  InviteMemberDto,
+  UpdateMemberRoleDto,
+  TransferOwnershipDto,
 } from "./types";
 
 export class HoulaClient {
-  private readonly config: Required<HoulaConfig>;
+  private readonly config: ReturnType<typeof createConfig>;
 
   constructor(config: HoulaConfig) {
     this.config = createConfig(config);
+  }
+
+  /**
+   * Set the workspace ID for all subsequent requests.
+   * Pass undefined to clear (revert to default/personal workspace).
+   */
+  setWorkspaceId(workspaceId: string | undefined): void {
+    (this.config as any).workspaceId = workspaceId;
   }
 
   private get baseUrl(): string {
@@ -53,12 +69,18 @@ export class HoulaClient {
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-API-Key": this.config.apiKey,
+      };
+      if (this.config.workspaceId) {
+        headers["X-Workspace-Id"] = this.config.workspaceId;
+      }
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
         headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": this.config.apiKey,
+          ...headers,
           ...options.headers,
         },
       });
@@ -134,12 +156,16 @@ export class HoulaClient {
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
+      const uploadHeaders: Record<string, string> = {
+        "X-API-Key": this.config.apiKey,
+      };
+      if (this.config.workspaceId) {
+        uploadHeaders["X-Workspace-Id"] = this.config.workspaceId;
+      }
       const response = await fetch(url, {
         method: "POST",
         signal: controller.signal,
-        headers: {
-          "X-API-Key": this.config.apiKey,
-        },
+        headers: uploadHeaders,
         body: formData,
       });
 
@@ -397,6 +423,96 @@ export class HoulaClient {
     return this.request<BioPage>(`/api/manager/profile/bio-pages/${id}/custom-domain`, {
       method: "PATCH",
       body: JSON.stringify(data),
+    });
+  }
+
+  // ─── Workspaces ───
+
+  /** List all workspaces the authenticated user belongs to */
+  async listWorkspaces(): Promise<Workspace[]> {
+    return this.request<Workspace[]>("/api/workspaces");
+  }
+
+  /** Get a workspace by ID */
+  async getWorkspace(id: string): Promise<Workspace> {
+    return this.request<Workspace>(`/api/workspaces/${id}`);
+  }
+
+  /** Create a new team workspace */
+  async createWorkspace(data: CreateWorkspaceDto): Promise<Workspace> {
+    return this.request<Workspace>("/api/workspaces", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** Update a workspace (owner only) */
+  async updateWorkspace(id: string, data: UpdateWorkspaceDto): Promise<Workspace> {
+    return this.request<Workspace>(`/api/workspaces/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** Delete a team workspace (owner only) */
+  async deleteWorkspace(id: string): Promise<void> {
+    await this.request<void>(`/api/workspaces/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  /** List members of a workspace */
+  async listWorkspaceMembers(workspaceId: string): Promise<WorkspaceMember[]> {
+    return this.request<WorkspaceMember[]>(`/api/workspaces/${workspaceId}/members`);
+  }
+
+  /** Update a member's role (owner only) */
+  async updateMemberRole(workspaceId: string, memberId: string, data: UpdateMemberRoleDto): Promise<WorkspaceMember> {
+    return this.request<WorkspaceMember>(`/api/workspaces/${workspaceId}/members/${memberId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** Remove a member from a workspace */
+  async removeMember(workspaceId: string, memberId: string): Promise<void> {
+    await this.request<void>(`/api/workspaces/${workspaceId}/members/${memberId}`, {
+      method: "DELETE",
+    });
+  }
+
+  /** Transfer workspace ownership (owner only) */
+  async transferOwnership(workspaceId: string, data: TransferOwnershipDto): Promise<Workspace> {
+    return this.request<Workspace>(`/api/workspaces/${workspaceId}/transfer`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** Invite a member by email (owner only) */
+  async inviteMember(workspaceId: string, data: InviteMemberDto): Promise<WorkspaceInvite> {
+    return this.request<WorkspaceInvite>(`/api/workspaces/${workspaceId}/invites`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** List pending invitations (owner only) */
+  async listInvites(workspaceId: string): Promise<WorkspaceInvite[]> {
+    return this.request<WorkspaceInvite[]>(`/api/workspaces/${workspaceId}/invites`);
+  }
+
+  /** Cancel a pending invitation (owner only) */
+  async cancelInvite(workspaceId: string, inviteId: string): Promise<void> {
+    await this.request<void>(`/api/workspaces/${workspaceId}/invites/${inviteId}`, {
+      method: "DELETE",
+    });
+  }
+
+  /** Accept a workspace invitation */
+  async acceptInvite(token: string): Promise<WorkspaceMember> {
+    return this.request<WorkspaceMember>(`/api/workspaces/invites/${token}/accept`, {
+      method: "POST",
     });
   }
 }
