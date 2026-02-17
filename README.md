@@ -630,6 +630,32 @@ await houla.deleteTag(tag.id);
 | `createdAt` | `string` | ISO 8601 creation date |
 | `updatedAt` | `string` | ISO 8601 last update date |
 
+### Link Cloaking
+
+The `isCloaked` field enables Link Cloaking, which hides the destination URL in the browser address bar using a full-screen iframe.
+
+```typescript
+// Create a cloaked link
+const link = await client.createLink({
+  url: "https://example.com/affiliate?ref=mycode",
+  isCloaked: true,
+});
+
+// Update to enable/disable cloaking
+const updated = await client.updateLink(link.id, {
+  isCloaked: false,
+});
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `isCloaked` | `boolean` | Hide destination URL in browser address bar (default: `false`) |
+
+**Notes:**
+- Bots (Google, Facebook, etc.) receive a standard 301 redirect for SEO
+- Some sites with anti-iframe protections (X-Frame-Options, CSP) cannot be cloaked
+- Compatible with all other features (analytics, pixels, password, click limit)
+
 ## Framework Examples
 
 ### Next.js (App Router)
