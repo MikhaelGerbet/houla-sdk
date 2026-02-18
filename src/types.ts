@@ -774,6 +774,22 @@ export interface MigrateToWorkspaceDto {
   qrcodeTemplates?: string[];
 }
 
+/** DTO for upgrading a personal workspace to a team workspace */
+export interface UpgradeWorkspaceDto {
+  /** New team workspace name */
+  teamName: string;
+  /** Optional team workspace description */
+  teamDescription?: string;
+}
+
+/** Result of upgrading a personal workspace to team */
+export interface UpgradeWorkspaceResult {
+  /** The existing workspace, now converted to team */
+  teamWorkspace: Workspace;
+  /** The newly created personal workspace (empty) */
+  personalWorkspace: Workspace;
+}
+
 /** Migration report - number of elements migrated per type */
 export type MigrationReport = Record<string, number>;
 
