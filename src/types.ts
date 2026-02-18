@@ -752,3 +752,30 @@ export interface TransferOwnershipDto {
   newOwnerId: string;
 }
 
+/** DTO for migrating elements between workspaces */
+export interface MigrateToWorkspaceDto {
+  /** UUID of the source workspace */
+  sourceWorkspaceId: string;
+  /** Link IDs to migrate, or ['all'] for all links */
+  links?: string[];
+  /** Tag IDs to migrate, or ['all'] for all tags */
+  tags?: string[];
+  /** Webhook IDs to migrate, or ['all'] for all webhooks */
+  webhooks?: string[];
+  /** Pixel preset IDs to migrate, or ['all'] for all presets */
+  pixelPresets?: string[];
+  /** Custom domain IDs to migrate, or ['all'] for all domains */
+  domains?: string[];
+  /** API key IDs to migrate, or ['all'] for all API keys */
+  apiKeys?: string[];
+  /** Bio page IDs to migrate, or ['all'] for all bio pages */
+  bioPages?: string[];
+  /** QR code template IDs to migrate, or ['all'] for all templates */
+  qrcodeTemplates?: string[];
+}
+
+/** Migration report - number of elements migrated per type */
+export type MigrationReport = Record<string, number>;
+
+/** Element counts per type in a workspace */
+export type WorkspaceStats = Record<string, number>;
