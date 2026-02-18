@@ -116,6 +116,10 @@ export interface Link {
   deepLinkAndroid?: string;
   /** Fallback URL (App Store / Play Store) when app is not installed (max 2048 chars) */
   deepLinkFallbackUrl?: string;
+  /** ID of the automatically detected platform (read-only, set by the API) */
+  platformDeepLinkId?: string;
+  /** Whether deep links were auto-detected (true) or manually set (false) */
+  deepLinkAutoDetected?: boolean;
 }
 
 export interface QRCodeOptions {
