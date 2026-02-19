@@ -18,6 +18,7 @@
 - **Custom keys** - Choose your own short URL keys
 - **Smart Routing** - Redirect visitors based on country, device, language, time, and more
 - **Webhooks** - Real-time HTTP notifications for 10 event types (including Link-in-Bio exclusives)
+- **Teams/Workspaces** - Collaborative workspaces with roles (Owner/Member/Viewer) and email invitations - FREE
 - **No ads** - Clean, fast redirects without any advertising
 
 ## Why this SDK?
@@ -726,6 +727,9 @@ export class LinkService {
 | **Retargeting Pixels** | FREE | Paid | No | Paid |
 | **Pixel Presets** | FREE | No | No | No |
 | **OG Social Previews** | FREE | Enterprise only | No | No |
+| **Teams/Workspaces** | FREE | Enterprise only | Paid ($32/mo) | Paid |
+| **Custom Domains** | FREE | Paid ($29/mo) | Paid ($13/mo) | Paid ($11/mo) |
+| **Deep Links Mobile** | FREE (30+ apps) | Paid ($199/mo) | No | No |
 
 ## Get Your FREE API Key
 

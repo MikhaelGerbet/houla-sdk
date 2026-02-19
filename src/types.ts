@@ -690,6 +690,24 @@ export interface Workspace {
   maxCustomDomains: number;
   /** Max API keys */
   maxApiKeys: number;
+  /** Max bio pages (null = unlimited) */
+  maxBioPages?: number;
+  /** Max tags (null = unlimited) */
+  maxTags?: number | null;
+  /** Stats retention in days (null = unlimited) */
+  statsRetentionDays?: number | null;
+  /** API rate limit (requests per minute) */
+  apiRateLimit?: number;
+  /** Domain finder daily limit (null = unlimited) */
+  domainFinderDailyLimit?: number | null;
+  /** Whether CSV export is allowed */
+  canExportCsv?: boolean;
+  /** Whether branding badge is shown */
+  showBranding?: boolean;
+  /** Subscription interval (monthly/yearly) */
+  planInterval?: string | null;
+  /** Subscription period end date */
+  planPeriodEnd?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -795,3 +813,57 @@ export type MigrationReport = Record<string, number>;
 
 /** Element counts per type in a workspace */
 export type WorkspaceStats = Record<string, number>;
+
+// ═══════════════════════════════════════════════════════════════
+// Billing
+// ═══════════════════════════════════════════════════════════════
+
+/** Plan limit values */
+export interface PlanLimits {
+  maxLinks: number | null;
+  maxCustomDomains: number;
+  maxMembers: number;
+  maxApiKeys: number;
+  maxBioPages: number;
+  maxTags: number | null;
+  statsRetentionDays: number | null;
+  apiRateLimit: number;
+  domainFinderDailyLimit: number | null;
+  canExportCsv: boolean;
+  showBranding: boolean;
+}
+
+/** Single plan info (from GET /api/billing/plans) */
+export interface PlanInfo {
+  id: string;
+  name: string;
+  prices: { monthly: number; yearly: number };
+  limits: PlanLimits;
+}
+
+/** Billing info (from GET /api/workspaces/:id/billing) */
+export interface BillingInfo {
+  plan: WorkspacePlan;
+  interval: string | null;
+  periodEnd: string | null;
+  status: string | null;
+  cancelAtPeriodEnd: boolean;
+  limits: PlanLimits;
+  stripePublicKey: string;
+}
+
+/** DTO for creating a checkout session */
+export interface CreateCheckoutDto {
+  plan: "pro" | "business";
+  interval: "monthly" | "yearly";
+}
+
+/** Result of creating a checkout session */
+export interface CheckoutResult {
+  url: string;
+}
+
+/** Result of creating a portal session */
+export interface PortalResult {
+  url: string;
+}
