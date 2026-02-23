@@ -657,6 +657,54 @@ const updated = await client.updateLink(link.id, {
 - Some sites with anti-iframe protections (X-Frame-Options, CSP) cannot be cloaked
 - Compatible with all other features (analytics, pixels, password, click limit)
 
+## Pay Links Types
+
+The SDK exports TypeScript types for the Pay Links feature (Stripe Connect-based product sales on Link in Bio pages):
+
+### Enums
+
+| Enum | Values |
+|------|--------|
+| `StripeConnectStatus` | `not_connected`, `onboarding`, `active`, `restricted` |
+| `PayLinkStatus` | `active`, `paused`, `sold_out`, `archived` |
+| `PayLinkProductType` | `physical`, `digital`, `service`, `donation` |
+| `PayLinkCurrency` | `EUR`, `USD`, `GBP`, `CAD`, `CHF` |
+| `PayLinkProductSource` | `manual`, `woocommerce`, `shopify`, `etsy` |
+| `PayLinkCtaStyle` | `default`, `featured`, `minimal` |
+| `PayLinkOrderStatus` | `pending`, `paid`, `processing`, `fulfilled`, `failed`, `refunded`, `partially_refunded`, `ecommerce_sync_failed` |
+
+### Interfaces
+
+| Interface | Description |
+|-----------|-------------|
+| `PayLink` | Full Pay Link object (id, title, price, stock, status, etc.) |
+| `PayLinkOrder` | Order record (buyer, amounts, shipping, status) |
+| `PayLinkOrderStats` | Revenue/order count aggregates |
+| `CreatePayLinkDto` | Fields for creating a Pay Link |
+| `UpdatePayLinkDto` | Partial update fields (+ status) |
+| `CreatePayLinkCheckoutDto` | Checkout session creation (buyer info, quantity) |
+
+### CreatePayLinkDto Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `bioPageId` | `string` | Yes | Bio page to attach the Pay Link to |
+| `title` | `string` | Yes | Product title (max 120 chars) |
+| `priceInCents` | `number` | Yes | Price in cents (1999 = 19.99) |
+| `description` | `string` | No | Product description |
+| `imageUrl` | `string` | No | Product image URL |
+| `productType` | `PayLinkProductType` | No | Default: `physical` |
+| `currency` | `PayLinkCurrency` | No | Default: `EUR` |
+| `compareAtPrice` | `number` | No | Original price before discount |
+| `quantityAvailable` | `number` | No | Stock (null = unlimited) |
+| `maxPerOrder` | `number` | No | Max quantity per order (1-100) |
+| `shippingCost` | `number` | No | Shipping cost in cents |
+| `digitalFileUrl` | `string` | No | Download URL (digital products) |
+| `ctaStyle` | `PayLinkCtaStyle` | No | Button style |
+| `ctaText` | `string` | No | Button text (max 40 chars) |
+
+> **Note:** The SDK currently provides types only. Pay Link CRUD operations are performed via the REST API with Bearer JWT authentication (not API keys).
+
 ## Framework Examples
 
 ### Next.js (App Router)
