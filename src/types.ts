@@ -15,6 +15,7 @@ export enum LinkCreatedType {
   API = "api",
   EXTENSION = "extension",
   BROWSER = "browser",
+  WORDPRESS = "wordpress",
 }
 
 export enum EphemeralDuration {
