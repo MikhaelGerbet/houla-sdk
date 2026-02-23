@@ -867,3 +867,337 @@ export interface CheckoutResult {
 export interface PortalResult {
   url: string;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Pay Links (Stripe Connect marketplace)
+// ═══════════════════════════════════════════════════════════════
+
+// ─── Stripe Connect ───
+
+export enum StripeConnectStatus {
+  NOT_CONNECTED = "not_connected",
+  ONBOARDING = "onboarding",
+  ACTIVE = "active",
+  RESTRICTED = "restricted",
+  DISABLED = "disabled",
+}
+
+// ─── PayLink Enums ───
+
+export enum PayLinkStatus {
+  ACTIVE = "active",
+  PAUSED = "paused",
+  SOLD_OUT = "sold_out",
+  ARCHIVED = "archived",
+}
+
+export enum PayLinkProductType {
+  PHYSICAL = "physical",
+  DIGITAL = "digital",
+  SERVICE = "service",
+  DONATION = "donation",
+}
+
+export enum PayLinkCurrency {
+  EUR = "EUR",
+  USD = "USD",
+  GBP = "GBP",
+  CAD = "CAD",
+  CHF = "CHF",
+}
+
+export enum PayLinkProductSource {
+  MANUAL = "manual",
+  WOOCOMMERCE = "woocommerce",
+  SHOPIFY = "shopify",
+  ETSY = "etsy",
+}
+
+export enum PayLinkCtaStyle {
+  DEFAULT = "default",
+  FEATURED = "featured",
+  MINIMAL = "minimal",
+}
+
+export enum PayLinkOrderStatus {
+  PENDING = "pending",
+  PAID = "paid",
+  PROCESSING = "processing",
+  FULFILLED = "fulfilled",
+  FAILED = "failed",
+  REFUNDED = "refunded",
+  PARTIALLY_REFUNDED = "partially_refunded",
+  ECOMMERCE_SYNC_FAILED = "ecommerce_sync_failed",
+}
+
+// ─── PayLink Interface ───
+
+export interface PayLink {
+  /** UUID */
+  id: string;
+  /** Owner user ID */
+  userId: string;
+  /** Bio page this PayLink belongs to */
+  bioPageId: string;
+  /** Product title (max 120 chars) */
+  title: string;
+  /** Product description */
+  description?: string;
+  /** Product image URL */
+  imageUrl?: string;
+  /** Type of product */
+  productType: PayLinkProductType;
+  /** Price in cents (e.g. 1999 = 19.99 EUR). For donations, minimum amount (nullable). */
+  priceInCents: number;
+  /** Currency */
+  currency: PayLinkCurrency;
+  /** Compare-at price in cents (strikethrough price for promotions) */
+  compareAtPrice?: number;
+  /** Available quantity (null = unlimited) */
+  quantityAvailable?: number;
+  /** Number of units sold */
+  quantitySold: number;
+  /** Maximum quantity per order */
+  maxPerOrder: number;
+  /** Fixed shipping cost in cents (null = free) */
+  shippingCost?: number;
+  /** Allowed shipping country codes (ISO). null = worldwide. */
+  shippingCountries?: string[];
+  /** Digital file name (visible to buyer after payment) */
+  digitalFileName?: string;
+  /** Product source: manual (Lot 1A) or e-commerce platform (Lot 1B) */
+  productSource: PayLinkProductSource;
+  /** External product ID on the e-commerce platform */
+  externalProductId?: string;
+  /** External variant ID (size, color) on the e-commerce platform */
+  externalVariantId?: string;
+  /** PayLink status */
+  status: PayLinkStatus;
+  /** Display order on the bio page */
+  displayOrder: number;
+  /** CTA button style */
+  ctaStyle: PayLinkCtaStyle;
+  /** CTA button text (null = default "Acheter") */
+  ctaText?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── PayLink Order Interface ───
+
+export interface PayLinkOrder {
+  /** UUID */
+  id: string;
+  /** Human-readable order number (e.g. HOU-20260215-XXXX) */
+  orderNumber: string;
+  /** PayLink ID (nullable if PayLink deleted) */
+  payLinkId?: string;
+  /** Seller user ID */
+  sellerId: string;
+  /** Buyer email */
+  buyerEmail: string;
+  /** Buyer first name */
+  buyerFirstName?: string;
+  /** Buyer last name */
+  buyerLastName?: string;
+  /** Buyer phone */
+  buyerPhone?: string;
+  /** Shipping address line 1 */
+  shippingAddressLine1?: string;
+  /** Shipping address line 2 */
+  shippingAddressLine2?: string;
+  /** Shipping city */
+  shippingCity?: string;
+  /** Shipping state/region */
+  shippingState?: string;
+  /** Shipping postal code */
+  shippingPostalCode?: string;
+  /** Shipping country (ISO 2-letter code) */
+  shippingCountry?: string;
+  /** Subtotal in cents */
+  subtotalCents: number;
+  /** Shipping cost in cents */
+  shippingCents: number;
+  /** Platform fee in cents (Hou.la commission) */
+  platformFeeCents: number;
+  /** Total charged to buyer in cents */
+  totalCents: number;
+  /** Currency */
+  currency: PayLinkCurrency;
+  /** Quantity ordered */
+  quantity: number;
+  /** External order ID on e-commerce platform (Lot 1B) */
+  externalOrderId?: string;
+  /** External order URL on e-commerce platform */
+  externalOrderUrl?: string;
+  /** Order status */
+  status: PayLinkOrderStatus;
+  /** Timestamp when payment was confirmed */
+  paidAt?: string;
+  /** Timestamp when order was fulfilled */
+  fulfilledAt?: string;
+  /** Timestamp when order was refunded */
+  refundedAt?: string;
+  /** Refund amount in cents (partial or full) */
+  refundAmountCents?: number;
+  /** Buyer country (detected from IP) */
+  buyerCountry?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── PayLink Order Stats ───
+
+export interface PayLinkOrderStats {
+  /** Total revenue in cents (paid orders only) */
+  totalRevenue: number;
+  /** Total number of paid orders */
+  totalOrders: number;
+  /** Total refunded amount in cents */
+  totalRefunded: number;
+  /** Revenue this month in cents */
+  thisMonth: number;
+}
+
+// ─── PayLink DTOs ───
+
+export interface CreatePayLinkDto {
+  /** Bio page ID to attach this PayLink to */
+  bioPageId: string;
+  /** Product title (max 120 chars) */
+  title: string;
+  /** Product description */
+  description?: string;
+  /** Product image URL */
+  imageUrl?: string;
+  /** Product type */
+  productType?: PayLinkProductType;
+  /** Price in cents (e.g. 1999 = 19.99 EUR) */
+  priceInCents: number;
+  /** Currency (default: EUR) */
+  currency?: PayLinkCurrency;
+  /** Compare-at price in cents (strikethrough price for promotions) */
+  compareAtPrice?: number;
+  /** Available quantity (null = unlimited) */
+  quantityAvailable?: number;
+  /** Max quantity per order (default: 1) */
+  maxPerOrder?: number;
+  /** Fixed shipping cost in cents (null = free) */
+  shippingCost?: number;
+  /** Allowed shipping country codes (ISO). null = worldwide. */
+  shippingCountries?: string[];
+  /** URL of the digital file to deliver after payment */
+  digitalFileUrl?: string;
+  /** Display name of the digital file */
+  digitalFileName?: string;
+  /** Display order on the bio page */
+  displayOrder?: number;
+  /** CTA button style */
+  ctaStyle?: PayLinkCtaStyle;
+  /** CTA button text (null = default "Acheter") */
+  ctaText?: string;
+}
+
+export interface UpdatePayLinkDto {
+  /** Product title (max 120 chars) */
+  title?: string;
+  /** Product description */
+  description?: string;
+  /** Product image URL */
+  imageUrl?: string;
+  /** Product type */
+  productType?: PayLinkProductType;
+  /** Price in cents */
+  priceInCents?: number;
+  /** Currency */
+  currency?: PayLinkCurrency;
+  /** Compare-at price in cents, or null to remove */
+  compareAtPrice?: number | null;
+  /** Available quantity, or null for unlimited */
+  quantityAvailable?: number | null;
+  /** Max quantity per order */
+  maxPerOrder?: number;
+  /** Fixed shipping cost in cents, or null for free */
+  shippingCost?: number | null;
+  /** Allowed shipping country codes, or null for worldwide */
+  shippingCountries?: string[] | null;
+  /** URL of the digital file */
+  digitalFileUrl?: string;
+  /** Display name of the digital file */
+  digitalFileName?: string;
+  /** Display order on the bio page */
+  displayOrder?: number;
+  /** CTA button style */
+  ctaStyle?: PayLinkCtaStyle;
+  /** CTA button text, or null to reset to default */
+  ctaText?: string | null;
+  /** PayLink status */
+  status?: PayLinkStatus;
+}
+
+export interface CreatePayLinkCheckoutDto {
+  /** PayLink ID to purchase */
+  payLinkId: string;
+  /** Quantity to purchase */
+  quantity: number;
+  /** Buyer email */
+  buyerEmail: string;
+  /** Buyer first name */
+  buyerFirstName?: string;
+  /** Buyer last name */
+  buyerLastName?: string;
+  /** Buyer phone */
+  buyerPhone?: string;
+  /** Shipping address line 1 */
+  shippingAddressLine1?: string;
+  /** Shipping address line 2 */
+  shippingAddressLine2?: string;
+  /** Shipping city */
+  shippingCity?: string;
+  /** Shipping state/region */
+  shippingState?: string;
+  /** Shipping postal code */
+  shippingPostalCode?: string;
+  /** Shipping country (ISO 2-letter code) */
+  shippingCountry?: string;
+}
+
+/** Stripe Connect onboarding result */
+export interface StripeConnectOnboardingResult {
+  /** Redirect URL to Stripe's onboarding page */
+  url: string;
+}
+
+/** Stripe Connect dashboard link result */
+export interface StripeConnectDashboardResult {
+  /** Redirect URL to the Stripe Express dashboard */
+  url: string;
+}
+
+/** Stripe Connect account status */
+export interface StripeConnectStatusResult {
+  /** Current Stripe Connect status */
+  status: StripeConnectStatus;
+  /** Whether the account can receive payments */
+  chargesEnabled: boolean;
+  /** Whether the account can receive payouts */
+  payoutsEnabled: boolean;
+}
+
+/** Checkout session result */
+export interface PayLinkCheckoutResult {
+  /** Stripe Checkout Session URL to redirect the buyer */
+  url: string;
+  /** Order ID for tracking */
+  orderId: string;
+}
+
+/** Order status result (public) */
+export interface PayLinkOrderStatusResult {
+  /** Order status */
+  status: PayLinkOrderStatus;
+  /** Order number */
+  orderNumber: string;
+  /** Download URL for digital products (only when status is fulfilled/paid) */
+  downloadUrl?: string;
+}
