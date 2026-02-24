@@ -609,6 +609,18 @@ export interface BioPage extends BioPageSummary {
   textColor: string | null;
   /** Whether avatar is shown */
   showAvatar: boolean;
+  /** Whether display name is shown */
+  showDisplayName: boolean;
+  /** Whether username is shown */
+  showUsername: boolean;
+  /** Background position (center, top, bottom, contain) */
+  backgroundPosition: string | null;
+  /** Background size (cover, contain, auto) */
+  backgroundSize: string | null;
+  /** Background blur (0-50 px) */
+  backgroundBlur: number | null;
+  /** Background noise texture */
+  backgroundNoise: boolean;
 }
 
 export interface CreateBioPageDto {
