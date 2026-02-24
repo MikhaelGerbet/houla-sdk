@@ -621,6 +621,8 @@ export interface BioPage extends BioPageSummary {
   backgroundBlur: number | null;
   /** Background noise texture */
   backgroundNoise: boolean;
+  /** Spacing between links/widgets in pixels (0-40) */
+  linkSpacing: number | null;
 }
 
 export interface CreateBioPageDto {
