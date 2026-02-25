@@ -605,6 +605,12 @@ export interface BioPage extends BioPageSummary {
   buttonBlur: number | null;
   /** Button opacity (0-100%) */
   buttonOpacity: number | null;
+  /** Border radius for buttons/widgets (0-50 px) */
+  borderRadius: number | null;
+  /** Font size for link titles (10-24 px) */
+  fontSize: number | null;
+  /** Font size for secondary text like descriptions (8-20 px) */
+  secondaryFontSize: number | null;
   /** Text color */
   textColor: string | null;
   /** Whether avatar is shown */
