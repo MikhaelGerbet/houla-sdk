@@ -623,6 +623,10 @@ export interface BioPage extends BioPageSummary {
   backgroundNoise: boolean;
   /** Spacing between links/widgets in pixels (0-40) */
   linkSpacing: number | null;
+  /** Background effect (null | 'gradient-fade') */
+  backgroundEffect: string | null;
+  /** Background animation (null | 'scroll-fade' | 'scroll-blur' | 'scroll-zoom') */
+  backgroundAnimation: string | null;
 }
 
 export interface CreateBioPageDto {
@@ -1214,4 +1218,93 @@ export interface PayLinkOrderStatusResult {
   orderNumber: string;
   /** Download URL for digital products (only when status is fulfilled/paid) */
   downloadUrl?: string;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORT
+// ═══════════════════════════════════════════════════════════════
+
+export enum ImportSource {
+  BITLY = "bitly",
+  CSV = "csv",
+}
+
+export enum ImportJobStatus {
+  PENDING = "pending",
+  PROCESSING = "processing",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+}
+
+/** Import job record */
+export interface ImportJob {
+  /** Unique identifier */
+  id: string;
+  /** User who started the import */
+  userId: string;
+  /** Workspace targeted for import */
+  workspaceId: string;
+  /** Source platform */
+  source: ImportSource;
+  /** Current job status */
+  status: ImportJobStatus;
+  /** Total number of links to import */
+  totalLinks: number;
+  /** Number of successfully imported links */
+  importedCount: number;
+  /** Number of skipped links (duplicates) */
+  skippedCount: number;
+  /** Number of links that failed to import */
+  errorCount: number;
+  /** Skip URLs already present in the workspace */
+  skipDuplicates: boolean;
+  /** Import tags from the source platform */
+  preserveTags: boolean;
+  /** Attempt to reuse source custom slugs */
+  preserveCustomSlugs: boolean;
+  /** Detailed error log */
+  errors: { url: string; reason: string }[] | null;
+  /** Global failure reason (if status is 'failed') */
+  failureReason: string | null;
+  /** Job creation date */
+  createdAt: string;
+  /** Last update date */
+  updatedAt: string;
+  /** Completion date */
+  completedAt: string | null;
+}
+
+/** DTO to start a new import */
+export interface CreateImportDto {
+  /** Source platform (currently only 'bitly') */
+  source: ImportSource;
+  /** API token from the source platform */
+  apiToken: string;
+  /** Skip URLs already present in the workspace (default: true) */
+  skipDuplicates?: boolean;
+  /** Import tags from the source (default: true) */
+  preserveTags?: boolean;
+  /** Attempt to reuse source custom slugs (default: false) */
+  preserveCustomSlugs?: boolean;
+}
+
+/** Real-time import progress (SSE) */
+export interface ImportProgress {
+  /** Job ID */
+  id: string;
+  /** Current status */
+  status: ImportJobStatus;
+  /** Total links to process */
+  totalLinks: number;
+  /** Successfully imported */
+  importedCount: number;
+  /** Skipped (duplicates) */
+  skippedCount: number;
+  /** Failed */
+  errorCount: number;
+  /** Completion date (null if still processing) */
+  completedAt: string | null;
+  /** Failure reason (null if no error) */
+  failureReason: string | null;
 }

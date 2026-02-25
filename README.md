@@ -705,6 +705,50 @@ The SDK exports TypeScript types for the Pay Links feature (Stripe Connect-based
 
 > **Note:** The SDK currently provides types only. Pay Link CRUD operations are performed via the REST API with Bearer JWT authentication (not API keys).
 
+## Import Types
+
+Types for link import from external platforms (Bitly, CSV).
+
+### Enums
+
+| Enum | Values | Description |
+|---|---|---|
+| `ImportSource` | `BITLY`, `CSV` | Import source platform |
+| `ImportJobStatus` | `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`, `CANCELLED` | Job lifecycle status |
+
+### ImportJob Interface
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | UUID of the import job |
+| `userId` | `string` | User who started the import |
+| `workspaceId` | `string` | Target workspace |
+| `source` | `ImportSource` | Source platform |
+| `status` | `ImportJobStatus` | Current status |
+| `totalLinks` | `number` | Total links to import |
+| `importedCount` | `number` | Successfully imported |
+| `skippedCount` | `number` | Skipped (duplicates) |
+| `errorCount` | `number` | Failed to import |
+| `skipDuplicates` | `boolean` | Skip duplicate URLs |
+| `preserveTags` | `boolean` | Import source tags |
+| `preserveCustomSlugs` | `boolean` | Preserve source slugs |
+| `errors` | `array` or `null` | Error details (url + reason) |
+| `failureReason` | `string` or `null` | Global failure reason |
+| `createdAt` | `string` | ISO timestamp |
+| `completedAt` | `string` or `null` | Completion timestamp |
+
+### CreateImportDto
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `source` | `ImportSource` | Yes | - | Source platform |
+| `apiToken` | `string` | Yes | - | API token for the source platform |
+| `skipDuplicates` | `boolean` | No | `true` | Skip URLs already in workspace |
+| `preserveTags` | `boolean` | No | `true` | Import tags from source |
+| `preserveCustomSlugs` | `boolean` | No | `false` | Try to keep source slugs |
+
+> **Note:** Import operations are performed via the REST API with Bearer JWT authentication (not API keys). The SDK provides types only.
+
 ## Framework Examples
 
 ### Next.js (App Router)

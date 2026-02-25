@@ -21,6 +21,8 @@ export {
   WorkspaceType,
   WorkspacePlan,
   WorkspaceRole,
+  ImportSource,
+  ImportJobStatus,
 } from "./types";
 
 // Types - Interfaces
@@ -65,4 +67,7 @@ export type {
   InviteMemberDto,
   UpdateMemberRoleDto,
   TransferOwnershipDto,
+  ImportJob,
+  CreateImportDto,
+  ImportProgress,
 } from "./types";
