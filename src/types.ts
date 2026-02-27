@@ -636,7 +636,7 @@ export interface BioPage extends BioPageSummary {
 }
 
 export interface CreateBioPageDto {
-  /** Username for the page URL (3-30 chars, a-zA-Z0-9_-) */
+  /** Username for the page URL (3-30 chars, a-zA-Z0-9_.-) */
   username: string;
   /** Display name for the page */
   displayName: string;
