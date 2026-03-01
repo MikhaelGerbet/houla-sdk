@@ -33,6 +33,16 @@ import {
   CreateBioPageDto,
   UpdateBioPageDto,
   AttachCustomDomainToBioPageDto,
+  ProfileLink,
+  ProfileSocialLink,
+  CreateProfileLinkDto,
+  UpdateProfileLinkDto,
+  AddExistingLinkDto,
+  UpdateExistingLinkDto,
+  ReorderLinksDto,
+  CreateSocialLinkDto,
+  UpdateSocialLinkDto,
+  ReorderSocialLinksDto,
   Workspace,
   CreateWorkspaceDto,
   UpdateWorkspaceDto,
@@ -421,6 +431,171 @@ export class HoulaClient {
 
   async attachCustomDomainToBioPage(id: string, data: AttachCustomDomainToBioPageDto): Promise<BioPage> {
     return this.request<BioPage>(`/api/manager/profile/bio-pages/${id}/custom-domain`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ─── Profile Links (Link-in-Bio content) ───
+
+  /**
+   * Get all links (dedicated + existing) for a bio page.
+   * @param bioPageId - Optional bio page UUID. If omitted, returns links from the default page.
+   */
+  async getProfileLinks(bioPageId?: string): Promise<ProfileLink[]> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request<ProfileLink[]>(`/api/manager/profile/links${params}`);
+  }
+
+  /**
+   * Create a dedicated link on the profile.
+   * @param data - Link data (title, url, style, embedType, etc.)
+   * @param bioPageId - Optional bio page UUID
+   */
+  async createProfileLink(data: CreateProfileLinkDto, bioPageId?: string): Promise<any> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request(`/api/manager/profile/links${params}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update a dedicated link on the profile.
+   * @param linkId - UUID of the profile link
+   * @param data - Fields to update
+   * @param bioPageId - Optional bio page UUID
+   */
+  async updateProfileLink(linkId: string, data: UpdateProfileLinkDto, bioPageId?: string): Promise<any> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request(`/api/manager/profile/links/${linkId}${params}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete a dedicated link from the profile.
+   * @param linkId - UUID of the profile link
+   * @param bioPageId - Optional bio page UUID
+   */
+  async deleteProfileLink(linkId: string, bioPageId?: string): Promise<void> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    await this.request<void>(`/api/manager/profile/links/${linkId}${params}`, {
+      method: "DELETE",
+    });
+  }
+
+  /**
+   * Reorder links on the profile.
+   * @param data - Ordered list of ProfileLinkOrder UUIDs
+   * @param bioPageId - Optional bio page UUID
+   */
+  async reorderProfileLinks(data: ReorderLinksDto, bioPageId?: string): Promise<any> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request(`/api/manager/profile/links/reorder${params}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Add an existing Hou.la link to the profile.
+   * @param data - Link ID and optional custom title
+   * @param bioPageId - Optional bio page UUID
+   */
+  async addExistingLink(data: AddExistingLinkDto, bioPageId?: string): Promise<any> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request(`/api/manager/profile/links/from-existing${params}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update an existing link on the profile (custom title, enabled state).
+   * @param existingLinkId - UUID of the ProfileLinkFromExisting
+   * @param data - Fields to update
+   * @param bioPageId - Optional bio page UUID
+   */
+  async updateExistingLink(existingLinkId: string, data: UpdateExistingLinkDto, bioPageId?: string): Promise<any> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request(`/api/manager/profile/links/from-existing/${existingLinkId}${params}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Remove an existing link from the profile.
+   * @param existingLinkId - UUID of the ProfileLinkFromExisting
+   * @param bioPageId - Optional bio page UUID
+   */
+  async deleteExistingLink(existingLinkId: string, bioPageId?: string): Promise<void> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    await this.request<void>(`/api/manager/profile/links/from-existing/${existingLinkId}${params}`, {
+      method: "DELETE",
+    });
+  }
+
+  // ─── Social Links ───
+
+  /**
+   * Get all social links for a bio page.
+   * @param bioPageId - Optional bio page UUID
+   */
+  async getSocialLinks(bioPageId?: string): Promise<ProfileSocialLink[]> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request<ProfileSocialLink[]>(`/api/manager/profile/social${params}`);
+  }
+
+  /**
+   * Add a social link to the profile.
+   * @param data - Platform and URL
+   * @param bioPageId - Optional bio page UUID
+   */
+  async createSocialLink(data: CreateSocialLinkDto, bioPageId?: string): Promise<ProfileSocialLink> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request<ProfileSocialLink>(`/api/manager/profile/social${params}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update a social link.
+   * @param socialLinkId - UUID of the social link
+   * @param data - Fields to update (url, isEnabled)
+   * @param bioPageId - Optional bio page UUID
+   */
+  async updateSocialLink(socialLinkId: string, data: UpdateSocialLinkDto, bioPageId?: string): Promise<ProfileSocialLink> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request<ProfileSocialLink>(`/api/manager/profile/social/${socialLinkId}${params}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete a social link.
+   * @param socialLinkId - UUID of the social link
+   * @param bioPageId - Optional bio page UUID
+   */
+  async deleteSocialLink(socialLinkId: string, bioPageId?: string): Promise<void> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    await this.request<void>(`/api/manager/profile/social/${socialLinkId}${params}`, {
+      method: "DELETE",
+    });
+  }
+
+  /**
+   * Reorder social links.
+   * @param data - Ordered list of social link UUIDs
+   * @param bioPageId - Optional bio page UUID
+   */
+  async reorderSocialLinks(data: ReorderSocialLinksDto, bioPageId?: string): Promise<any> {
+    const params = bioPageId ? `?bioPageId=${bioPageId}` : "";
+    return this.request(`/api/manager/profile/social/reorder${params}`, {
       method: "PATCH",
       body: JSON.stringify(data),
     });

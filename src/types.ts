@@ -666,6 +666,174 @@ export interface AttachCustomDomainToBioPageDto {
   customDomainId?: string | null;
 }
 
+// ─── Profile Links (Link-in-Bio content) ───
+
+/** Style of a profile link */
+export enum ProfileLinkStyle {
+  DEFAULT = "default",
+  FEATURED = "featured",
+  OUTLINE = "outline",
+  HEADER = "header",
+}
+
+/** Social platform for social links */
+export enum SocialPlatform {
+  INSTAGRAM = "instagram",
+  TWITTER = "twitter",
+  TIKTOK = "tiktok",
+  YOUTUBE = "youtube",
+  LINKEDIN = "linkedin",
+  FACEBOOK = "facebook",
+  TWITCH = "twitch",
+  DISCORD = "discord",
+  GITHUB = "github",
+  SPOTIFY = "spotify",
+  SNAPCHAT = "snapchat",
+  PINTEREST = "pinterest",
+  EMAIL = "email",
+  WEBSITE = "website",
+  THREADS = "threads",
+  WHATSAPP = "whatsapp",
+  TELEGRAM = "telegram",
+  MASTODON = "mastodon",
+  BLUESKY = "bluesky",
+  APPLE_MUSIC = "apple_music",
+  SOUNDCLOUD = "soundcloud",
+  APPLE_PODCAST = "apple_podcast",
+  BEREAL = "bereal",
+  AMAZON = "amazon",
+}
+
+/** Profile link (dedicated link or existing Hou.la link) as returned by the API */
+export interface ProfileLink {
+  /** UUID of the link order entry */
+  orderId: string;
+  /** Display order position */
+  order: number;
+  /** Link type: 'dedicated', 'header', or 'existing' */
+  type: "dedicated" | "header" | "existing";
+  /** The link data (dedicated/header) or existing link data */
+  link: ProfileLinkDedicated | ProfileLinkExisting;
+}
+
+/** Dedicated profile link data */
+export interface ProfileLinkDedicated {
+  id: string;
+  title: string;
+  url?: string;
+  icon?: string;
+  thumbnailUrl?: string;
+  imageUrl?: string;
+  style: ProfileLinkStyle;
+  isEnabled: boolean;
+  embedType?: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Existing Hou.la link attached to the profile */
+export interface ProfileLinkExisting {
+  id: string;
+  linkId: string;
+  customTitle?: string;
+  isEnabled: boolean;
+  link: {
+    id: string;
+    key: string;
+    url: string;
+    shortUrl: string;
+    title?: string;
+  };
+}
+
+/** Social link on a profile */
+export interface ProfileSocialLink {
+  id: string;
+  platform: SocialPlatform;
+  url: string;
+  isEnabled: boolean;
+  order: number;
+}
+
+/** Create a dedicated profile link */
+export interface CreateProfileLinkDto {
+  /** Link title (max 500 chars) */
+  title: string;
+  /** Destination URL (required unless style is header or embedType is text/divider/image/faq) */
+  url?: string;
+  /** PrimeIcons icon name (e.g. 'pi-globe') */
+  icon?: string;
+  /** Display style */
+  style?: ProfileLinkStyle;
+  /** Embed type for rich content blocks (youtube, spotify, text, divider, faq, etc.) */
+  embedType?: string;
+  /** JSON metadata for rich embeds */
+  metadata?: Record<string, any>;
+}
+
+/** Update a dedicated profile link */
+export interface UpdateProfileLinkDto {
+  /** Link title */
+  title?: string;
+  /** Destination URL */
+  url?: string;
+  /** PrimeIcons icon name */
+  icon?: string;
+  /** Enable/disable the link */
+  isEnabled?: boolean;
+  /** Display style */
+  style?: ProfileLinkStyle;
+  /** Embed type */
+  embedType?: string;
+  /** JSON metadata for rich embeds */
+  metadata?: Record<string, any>;
+}
+
+/** Add an existing Hou.la link to the profile */
+export interface AddExistingLinkDto {
+  /** UUID of the existing Hou.la link */
+  linkId: string;
+  /** Custom display title (max 100 chars) */
+  customTitle?: string;
+}
+
+/** Update an existing link on the profile */
+export interface UpdateExistingLinkDto {
+  /** Custom display title (max 100 chars) */
+  customTitle?: string;
+  /** Enable/disable the link */
+  isEnabled?: boolean;
+}
+
+/** Reorder links (pass ordered list of ProfileLinkOrder UUIDs) */
+export interface ReorderLinksDto {
+  /** Ordered list of link order UUIDs */
+  orderedIds: string[];
+}
+
+/** Create a social link */
+export interface CreateSocialLinkDto {
+  /** Social platform */
+  platform: SocialPlatform;
+  /** Full URL to the social profile */
+  url: string;
+}
+
+/** Update a social link */
+export interface UpdateSocialLinkDto {
+  /** Full URL to the social profile */
+  url?: string;
+  /** Enable/disable */
+  isEnabled?: boolean;
+}
+
+/** Reorder social links */
+export interface ReorderSocialLinksDto {
+  /** Ordered list of social link UUIDs */
+  orderedIds: string[];
+}
+
 // ─── Workspaces ───
 
 /** Workspace type */
