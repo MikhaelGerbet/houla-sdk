@@ -1482,3 +1482,311 @@ export interface ImportProgress {
   /** Failure reason (null if no error) */
   failureReason: string | null;
 }
+
+// ─── Shop: Products ───
+
+/** Product source (how the product was created) */
+export enum ShopProductSource {
+  MANUAL = "manual",
+  WOOCOMMERCE = "woocommerce",
+  SHOPIFY = "shopify",
+  PRESTASHOP = "prestashop",
+  ETSY = "etsy",
+}
+
+/** Product type */
+export enum ShopProductType {
+  PHYSICAL = "physical",
+  DIGITAL = "digital",
+  SERVICE = "service",
+}
+
+/** Product status */
+export enum ShopProductStatus {
+  ACTIVE = "active",
+  DRAFT = "draft",
+  ARCHIVED = "archived",
+  OUT_OF_STOCK = "out_of_stock",
+}
+
+/** Product option axis (e.g. "Size", "Color") */
+export interface ShopProductOption {
+  /** Option name (e.g. "Taille", "Couleur") */
+  name: string;
+  /** Possible values for this option (e.g. ["S", "M", "L", "XL"]) */
+  values: string[];
+}
+
+/** A single product variant (combination of option values) */
+export interface ShopProductVariant {
+  /** Unique variant identifier */
+  id: string;
+  /** Map of option name → selected value (e.g. { "Taille": "M", "Couleur": "Rouge" }) */
+  options: Record<string, string>;
+  /** Price in cents */
+  priceCents: number;
+  /** Compare-at / strike-through price in cents */
+  compareAtPriceCents?: number;
+  /** Stock quantity (null = unlimited) */
+  stockQuantity?: number;
+  /** SKU code */
+  sku?: string;
+  /** Variant-specific image URL */
+  imageUrl?: string;
+  /** External variant ID from ecommerce platform */
+  externalVariantId?: string;
+  /** Whether this variant is active/purchasable */
+  isActive: boolean;
+}
+
+/** Full shop product */
+export interface ShopProduct {
+  /** UUID */
+  id: string;
+  /** Owner user ID */
+  userId: string;
+  /** Workspace ID */
+  workspaceId?: string;
+
+  // ── Basic info ──
+  /** Product title (max 200 chars) */
+  title: string;
+  /** Full description (HTML allowed) */
+  description?: string;
+  /** Short description (max 300 chars) */
+  shortDescription?: string;
+  /** Main product image URL */
+  imageUrl?: string;
+  /** Gallery image URLs */
+  galleryUrls?: string[];
+  /** Product type */
+  productType: ShopProductType;
+
+  // ── Pricing ──
+  /** Base price in cents */
+  priceCents: number;
+  /** Currency code (e.g. "EUR") */
+  currency: string;
+  /** Compare-at / strike-through price in cents */
+  compareAtPriceCents?: number;
+
+  // ── Stock ──
+  /** Stock quantity (null = unlimited) */
+  stockQuantity?: number;
+  /** Maximum quantity per order */
+  maxPerOrder?: number;
+  /** Whether stock tracking is enabled */
+  trackStock: boolean;
+
+  // ── Variants ──
+  /** Option axes (e.g. Size, Color) */
+  options?: ShopProductOption[];
+  /** Product variants */
+  variants?: ShopProductVariant[];
+
+  // ── Shipping ──
+  /** Whether product requires shipping */
+  requiresShipping: boolean;
+  /** Weight in grams */
+  weightGrams?: number;
+
+  // ── Digital ──
+  /** Download URL for digital products */
+  digitalFileUrl?: string;
+  /** File name for digital products */
+  digitalFileName?: string;
+  /** File size in bytes */
+  digitalFileSizeBytes?: number;
+
+  // ── Organization ──
+  /** Tags (free-form strings) */
+  tags?: string[];
+  /** Collection IDs this product belongs to */
+  collectionIds?: string[];
+  /** Display order (lower = first) */
+  displayOrder: number;
+  /** Category ID */
+  categoryId?: string;
+
+  // ── Identifiers ──
+  /** EAN barcode (max 13 chars) */
+  ean?: string;
+  /** ISBN (max 17 chars) */
+  isbn?: string;
+
+  // ── Status ──
+  /** Product status */
+  status: ShopProductStatus;
+  /** Whether product is featured */
+  isFeatured: boolean;
+  /** Product source */
+  source: ShopProductSource;
+
+  // ── Stats ──
+  /** Total views */
+  viewsCount: number;
+  /** Total sales */
+  salesCount: number;
+  /** Average rating (0-5) */
+  averageRating: number;
+  /** Number of reviews */
+  reviewCount: number;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** DTO to create a shop product */
+export interface CreateShopProductDto {
+  /** Product title (required, max 200 chars) */
+  title: string;
+  /** Full description */
+  description?: string;
+  /** Short description (max 300 chars) */
+  shortDescription?: string;
+  /** Main image URL */
+  imageUrl?: string;
+  /** Gallery image URLs */
+  galleryUrls?: string[];
+  /** Product type (default: physical) */
+  productType?: ShopProductType;
+  /** Price in cents (required, min 0) */
+  priceCents: number;
+  /** Currency code (default: EUR) */
+  currency?: string;
+  /** Compare-at price in cents */
+  compareAtPriceCents?: number;
+  /** Stock quantity (null = unlimited) */
+  stockQuantity?: number;
+  /** Max quantity per order (1-100, default: 10) */
+  maxPerOrder?: number;
+  /** Enable stock tracking */
+  trackStock?: boolean;
+  /** Option axes for variants */
+  options?: ShopProductOption[];
+  /** Product variants */
+  variants?: ShopProductVariant[];
+  /** Requires shipping (default: true) */
+  requiresShipping?: boolean;
+  /** Weight in grams */
+  weightGrams?: number;
+  /** Digital file URL */
+  digitalFileUrl?: string;
+  /** Digital file name */
+  digitalFileName?: string;
+  /** Digital file size in bytes */
+  digitalFileSizeBytes?: number;
+  /** Tags */
+  tags?: string[];
+  /** Collection IDs */
+  collectionIds?: string[];
+  /** Display order */
+  displayOrder?: number;
+  /** Category ID */
+  categoryId?: string;
+  /** Product status (active | draft | archived) */
+  status?: string;
+  /** Whether product is featured */
+  isFeatured?: boolean;
+  /** EAN barcode */
+  ean?: string;
+  /** ISBN */
+  isbn?: string;
+  /** Workspace ID */
+  workspaceId?: string;
+}
+
+/** DTO to update a shop product (all fields optional) */
+export interface UpdateShopProductDto extends Partial<CreateShopProductDto> {}
+
+// ─── Shop: Orders ───
+
+/** Order status */
+export enum ShopOrderStatus {
+  PENDING = "pending",
+  PAID = "paid",
+  PROCESSING = "processing",
+  SHIPPED = "shipped",
+  DELIVERED = "delivered",
+  CANCELLED = "cancelled",
+  REFUNDED = "refunded",
+}
+
+/** An item in an order */
+export interface ShopOrderLineItem {
+  /** Product ID */
+  productId: string;
+  /** Variant ID (if product has variants) */
+  variantId?: string;
+  /** Product title at time of purchase */
+  title: string;
+  /** Quantity ordered */
+  quantity: number;
+  /** Unit price in cents */
+  unitPriceCents: number;
+  /** Total for this line (quantity × unitPrice) */
+  totalCents: number;
+  /** Product image URL */
+  imageUrl?: string;
+  /** Selected variant options (e.g. { "Size": "M", "Color": "Red" }) */
+  options?: Record<string, string>;
+}
+
+/** Shipping address on an order */
+export interface ShopOrderShippingAddress {
+  name?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+/** Full shop order */
+export interface ShopOrder {
+  /** UUID */
+  id: string;
+  /** Seller user ID */
+  sellerId: string;
+  /** Bio page username where purchase was made */
+  bioPageUsername: string;
+  /** Buyer email */
+  buyerEmail: string;
+  /** Buyer name */
+  buyerName?: string;
+  /** Order line items */
+  lineItems: ShopOrderLineItem[];
+  /** Number of items */
+  itemsCount: number;
+  /** Subtotal in cents */
+  subtotalCents: number;
+  /** Shipping cost in cents */
+  shippingCents: number;
+  /** Discount in cents */
+  discountCents: number;
+  /** Total in cents */
+  totalCents: number;
+  /** Currency */
+  currency: string;
+  /** Shipping address */
+  shippingAddress?: ShopOrderShippingAddress;
+  /** Carrier name */
+  carrier?: string;
+  /** Tracking number */
+  trackingNumber?: string;
+  /** Tracking URL */
+  trackingUrl?: string;
+  /** Order status */
+  status: ShopOrderStatus;
+  /** Date payment was confirmed */
+  paidAt?: string;
+  /** Date order was shipped */
+  shippedAt?: string;
+  /** Date order was delivered */
+  deliveredAt?: string;
+  /** Seller notes */
+  sellerNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}

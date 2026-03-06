@@ -23,6 +23,10 @@ export {
   WorkspaceRole,
   ImportSource,
   ImportJobStatus,
+  ShopProductSource,
+  ShopProductType,
+  ShopProductStatus,
+  ShopOrderStatus,
 } from "./types";
 
 // Types - Interfaces
@@ -70,4 +74,12 @@ export type {
   ImportJob,
   CreateImportDto,
   ImportProgress,
+  ShopProductOption,
+  ShopProductVariant,
+  ShopProduct,
+  CreateShopProductDto,
+  UpdateShopProductDto,
+  ShopOrderLineItem,
+  ShopOrderShippingAddress,
+  ShopOrder,
 } from "./types";
