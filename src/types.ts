@@ -1525,8 +1525,8 @@ export interface ShopProductVariant {
   options: Record<string, string>;
   /** Price in cents */
   priceCents: number;
-  /** Compare-at / strike-through price in cents */
-  compareAtPriceCents?: number;
+  /** Sale price in cents (promotional price, must be < priceCents) */
+  salePriceCents?: number;
   /** Stock quantity (null = unlimited) */
   stockQuantity?: number;
   /** SKU code */
@@ -1567,8 +1567,8 @@ export interface ShopProduct {
   priceCents: number;
   /** Currency code (e.g. "EUR") */
   currency: string;
-  /** Compare-at / strike-through price in cents */
-  compareAtPriceCents?: number;
+  /** Sale price in cents (promotional price, must be < priceCents) */
+  salePriceCents?: number;
 
   // ── Stock ──
   /** Stock quantity (null = unlimited) */
@@ -1654,8 +1654,8 @@ export interface CreateShopProductDto {
   priceCents: number;
   /** Currency code (default: EUR) */
   currency?: string;
-  /** Compare-at price in cents */
-  compareAtPriceCents?: number;
+  /** Sale price in cents (promotional price, must be < priceCents) */
+  salePriceCents?: number;
   /** Stock quantity (null = unlimited) */
   stockQuantity?: number;
   /** Max quantity per order (1-100, default: 10) */
