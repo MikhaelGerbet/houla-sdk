@@ -1777,6 +1777,16 @@ export interface ShopOrder {
   trackingNumber?: string;
   /** Tracking URL */
   trackingUrl?: string;
+  /** Total weight in grams */
+  totalWeightGrams?: number;
+  /** Shipping zone: national, continental, or international */
+  shippingZone?: string;
+  /** Shipping amount paid in cents */
+  shippingPaidCents?: number;
+  /** Open cart expiration date (ISO string) */
+  openUntil?: string;
+  /** Whether order uses local pickup instead of shipping */
+  isLocalPickup?: boolean;
   /** Order status */
   status: ShopOrderStatus;
   /** Date payment was confirmed */
