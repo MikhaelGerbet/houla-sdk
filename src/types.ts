@@ -1499,6 +1499,7 @@ export enum ShopProductType {
   PHYSICAL = "physical",
   DIGITAL = "digital",
   SERVICE = "service",
+  LIVE_SELLING = "live_selling",
 }
 
 /** Product status */
