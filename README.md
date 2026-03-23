@@ -834,6 +834,68 @@ export class LinkService {
 
 MIT - Free for personal and commercial use.
 
+## Print Types
+
+The SDK exports TypeScript types for the automatic printing feature (used by the Hou.la Print desktop app).
+
+### Enums
+
+```typescript
+import type {
+  PrintJobType,
+  PrintJobStatus,
+  PrintLabelFormat,
+  PrintInvoiceTrigger,
+  PrintLabelTemplate,
+} from '@houla/sdk';
+```
+
+| Enum | Values |
+|------|--------|
+| `PrintJobType` | `product_label`, `order_summary`, `invoice`, `shipping_label`, `packing_slip` |
+| `PrintJobStatus` | `pending`, `sent`, `printed`, `failed`, `cancelled` |
+| `PrintLabelFormat` | `zpl`, `pdf`, `escpos`, `png` |
+| `PrintInvoiceTrigger` | `paid`, `processing` |
+| `PrintLabelTemplate` | `standard`, `minimal`, `detailed` |
+
+### Interfaces
+
+```typescript
+import type { PrintConfig, PrintJob, UpdatePrintConfigDto, AckPrintJobDto } from '@houla/sdk';
+```
+
+**`PrintConfig`** — Workspace printing configuration:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Config UUID |
+| `workspaceId` | `string` | Workspace UUID |
+| `enabled` | `boolean` | Whether auto-printing is enabled |
+| `autoProductLabels` | `boolean` | Auto-print product labels |
+| `autoOrderSummary` | `boolean` | Auto-print order summaries |
+| `autoInvoice` | `boolean` | Auto-print invoices |
+| `autoInvoiceTrigger` | `PrintInvoiceTrigger` | When to trigger invoice printing |
+| `autoShippingLabel` | `boolean` | Auto-print shipping labels |
+| `autoPackingSlip` | `boolean` | Auto-print packing slips |
+| `productLabelTemplate` | `PrintLabelTemplate` | Label template style |
+| `brandName` | `string \| null` | Brand name on labels |
+
+**`PrintJob`** — A print job in the queue:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Job UUID |
+| `workspaceId` | `string` | Workspace UUID |
+| `orderId` | `string \| null` | Associated order ID |
+| `type` | `PrintJobType` | Type of document |
+| `status` | `PrintJobStatus` | Current status |
+| `labelFormat` | `PrintLabelFormat` | Output format |
+| `labelData` | `string \| null` | Inline label content (ZPL/ESC/POS) |
+| `labelUrl` | `string \| null` | URL to download label (PDF/PNG) |
+| `attempts` | `number` | Number of print attempts |
+| `lastError` | `string \| null` | Last error message |
+| `printedAt` | `string \| null` | ISO timestamp when printed |
+
 ---
 
 **Built with love by [Hou.la](https://hou.la)** - The free URL shortener for everyone.
