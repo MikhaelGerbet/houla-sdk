@@ -1801,3 +1801,110 @@ export interface ShopOrder {
   createdAt: string;
   updatedAt: string;
 }
+
+// ═══════════════════════════════════════════════════════
+// Print
+// ═══════════════════════════════════════════════════════
+
+export enum PrintJobType {
+  PRODUCT_LABEL = "product_label",
+  ORDER_SUMMARY = "order_summary",
+  INVOICE = "invoice",
+  SHIPPING_LABEL = "shipping_label",
+  PACKING_SLIP = "packing_slip",
+}
+
+export enum PrintJobStatus {
+  PENDING = "pending",
+  SENT = "sent",
+  PRINTED = "printed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+}
+
+export enum PrintLabelFormat {
+  ZPL = "zpl",
+  ESCPOS = "escpos",
+  PDF = "pdf",
+}
+
+export enum PrintInvoiceTrigger {
+  ON_PAID = "on_paid",
+  ON_SHIPPED = "on_shipped",
+}
+
+export enum PrintLabelTemplate {
+  SIMPLE = "simple",
+  DETAILED = "detailed",
+  COMPACT = "compact",
+}
+
+/** Print configuration for a workspace */
+export interface PrintConfig {
+  id: string;
+  workspaceId: string;
+  /** Whether printing is enabled */
+  enabled: boolean;
+  /** Auto-print product labels */
+  autoProductLabels: boolean;
+  /** Auto-print order summary (receipt) */
+  autoOrderSummary: boolean;
+  /** Auto-print invoice */
+  autoInvoice: boolean;
+  /** When to trigger invoice printing */
+  autoInvoiceTrigger: PrintInvoiceTrigger;
+  /** Auto-print shipping label */
+  autoShippingLabel: boolean;
+  /** Auto-print packing slip */
+  autoPackingSlip: boolean;
+  /** Label template to use */
+  productLabelTemplate: PrintLabelTemplate;
+  /** Brand name on labels */
+  brandName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A print job sent to the desktop app */
+export interface PrintJob {
+  id: string;
+  workspaceId: string;
+  orderId: string | null;
+  /** Type of document to print */
+  type: PrintJobType;
+  /** Current status */
+  status: PrintJobStatus;
+  /** Label format */
+  format: PrintLabelFormat;
+  /** Raw print data (ZPL/ESC/POS/PDF base64) */
+  payload: string | null;
+  /** Number of print attempts */
+  attempts: number;
+  /** Last error message */
+  lastError: string | null;
+  /** When the job was printed */
+  printedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Print statistics for a workspace */
+export interface PrintStats {
+  total: number;
+  pending: number;
+  printed: number;
+  failed: number;
+}
+
+/** DTO for updating print configuration */
+export interface UpdatePrintConfigDto {
+  enabled?: boolean;
+  autoProductLabels?: boolean;
+  autoOrderSummary?: boolean;
+  autoInvoice?: boolean;
+  autoInvoiceTrigger?: PrintInvoiceTrigger;
+  autoShippingLabel?: boolean;
+  autoPackingSlip?: boolean;
+  productLabelTemplate?: PrintLabelTemplate;
+  brandName?: string | null;
+}
