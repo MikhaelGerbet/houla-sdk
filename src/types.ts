@@ -1610,8 +1610,8 @@ export interface ShopProduct {
   categoryId?: string;
 
   // ── Identifiers ──
-  /** EAN barcode (max 13 chars) */
-  ean?: string;
+  /** GTIN barcode (max 14 chars, supports GTIN-8/12/13/14) */
+  gtin?: string;
   /** ISBN (max 17 chars) */
   isbn?: string;
 
@@ -1689,8 +1689,8 @@ export interface CreateShopProductDto {
   status?: string;
   /** Whether product is featured */
   isFeatured?: boolean;
-  /** EAN barcode */
-  ean?: string;
+  /** GTIN barcode (GTIN-8/12/13/14) */
+  gtin?: string;
   /** ISBN */
   isbn?: string;
   /** Workspace ID */
