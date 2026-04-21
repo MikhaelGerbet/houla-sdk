@@ -51,6 +51,14 @@ import {
   InviteMemberDto,
   UpdateMemberRoleDto,
   TransferOwnershipDto,
+  Tag,
+  CreateTagDto,
+  UpdateTagDto,
+  ExportStatsOptions,
+  HourlyStatsOptions,
+  HourlyStat,
+  DetailedStatsOptions,
+  DetailedStats,
 } from "./types";
 
 export class HoulaClient {
@@ -689,6 +697,76 @@ export class HoulaClient {
     return this.request<WorkspaceMember>(`/api/workspaces/invites/${token}/accept`, {
       method: "POST",
     });
+  }
+
+  // ═══════════════════════════════════════════
+  // Tags
+  // ═══════════════════════════════════════════
+
+  /** List all tags for the current workspace */
+  async getTags(): Promise<Tag[]> {
+    return this.request<Tag[]>("/api/manager/tag");
+  }
+
+  /** Get a single tag by ID */
+  async getTag(id: string): Promise<Tag> {
+    return this.request<Tag>(`/api/manager/tag/${id}`);
+  }
+
+  /** Create a new tag */
+  async createTag(data: CreateTagDto): Promise<Tag> {
+    return this.request<Tag>("/api/manager/tag", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** Update an existing tag */
+  async updateTag(id: string, data: UpdateTagDto): Promise<Tag> {
+    return this.request<Tag>(`/api/manager/tag/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /** Delete a tag */
+  async deleteTag(id: string): Promise<void> {
+    await this.request<void>(`/api/manager/tag/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // ═══════════════════════════════════════════
+  // Statistics / Hits
+  // ═══════════════════════════════════════════
+
+  /** Export click data for a link (JSON or CSV) */
+  async exportStats(linkId: string, options: ExportStatsOptions = {}): Promise<any> {
+    const params = new URLSearchParams();
+    if (options.format) params.set("format", options.format);
+    if (options.from) params.set("from", options.from);
+    if (options.to) params.set("to", options.to);
+    if (options.type) params.set("type", options.type);
+    const qs = params.toString();
+    return this.request<any>(`/api/hit/export/${linkId}${qs ? `?${qs}` : ""}`);
+  }
+
+  /** Get hourly click stats for a link */
+  async getHourlyStats(linkId: string, options: HourlyStatsOptions = {}): Promise<HourlyStat[]> {
+    const params = new URLSearchParams();
+    if (options.period) params.set("period", options.period);
+    if (options.from) params.set("from", options.from);
+    if (options.to) params.set("to", options.to);
+    const qs = params.toString();
+    return this.request<HourlyStat[]>(`/api/hit/hourly/${linkId}${qs ? `?${qs}` : ""}`);
+  }
+
+  /** Get detailed stats breakdown for a link */
+  async getDetailedStats(linkId: string, options: DetailedStatsOptions = {}): Promise<DetailedStats> {
+    const params = new URLSearchParams();
+    if (options.days !== undefined) params.set("days", options.days.toString());
+    const qs = params.toString();
+    return this.request<DetailedStats>(`/api/hit/detailed/${linkId}${qs ? `?${qs}` : ""}`);
   }
 }
 

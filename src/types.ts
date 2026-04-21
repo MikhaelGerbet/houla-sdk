@@ -1908,3 +1908,51 @@ export interface UpdatePrintConfigDto {
   productLabelTemplate?: PrintLabelTemplate;
   brandName?: string | null;
 }
+
+// ═══════════════════════════════════════════
+// Statistics / Hits
+// ═══════════════════════════════════════════
+
+/** Options for exporting hit data */
+export interface ExportStatsOptions {
+  /** Output format: json or csv */
+  format?: "json" | "csv";
+  /** Start date (YYYY-MM-DD) */
+  from?: string;
+  /** End date (YYYY-MM-DD) */
+  to?: string;
+  /** Filter by click type */
+  type?: string;
+}
+
+/** Options for hourly stats */
+export interface HourlyStatsOptions {
+  /** Period: 24h, 7d, 30d, 90d, custom */
+  period?: "24h" | "7d" | "30d" | "90d" | "custom";
+  /** Start date if period=custom (ISO 8601) */
+  from?: string;
+  /** End date if period=custom (ISO 8601) */
+  to?: string;
+}
+
+/** A single hourly data point */
+export interface HourlyStat {
+  hour: string;
+  count: number;
+}
+
+/** Options for detailed stats */
+export interface DetailedStatsOptions {
+  /** Number of days to analyze (default: 30) */
+  days?: number;
+}
+
+/** Detailed statistics breakdown */
+export interface DetailedStats {
+  totalHits: number;
+  countries: Record<string, number>;
+  browsers: Record<string, number>;
+  os: Record<string, number>;
+  devices: Record<string, number>;
+  referrers: Record<string, number>;
+}
